@@ -1,4 +1,4 @@
-# dietkus apps
+# dietkuys apps
 
 A new Flutter project.
 
