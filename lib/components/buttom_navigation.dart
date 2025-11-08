@@ -11,19 +11,16 @@ class BottomNav extends StatelessWidget {
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, '/homepage');
+        Navigator.pushNamed(context, '/homepage');
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, '/riwayat');
+        Navigator.pushNamed(context, '/artikel');
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, '/artikel');
+        Navigator.pushNamed(context, '/riwayat');
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, '/notifikasi');
-        break;
-      case 4:
-        Navigator.pushReplacementNamed(context, '/profile');
+        Navigator.pushNamed(context, '/profile');
         break;
     }
   }
@@ -41,7 +38,6 @@ class BottomNav extends StatelessWidget {
       items:[
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Artikel'),
-        BottomNavigationBarItem(icon: Icon(Icons.chat_rounded), label: 'Chatbot'),
         BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],

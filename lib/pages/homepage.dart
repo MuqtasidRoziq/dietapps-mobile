@@ -52,34 +52,53 @@ class _HomepageState extends State<Homepage> {
               child: Row(
                 children: [
                   IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
-                  IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
-                  IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
-                  IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
-                  IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
-                  IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
+                  IklanCard("Sarapan", "jangan lupa sarapan biar hari hari mu tidak lemas", "assets/images/sarapan.png", Colors.white, "lihat detail"),
+                  IklanCard("Workout", "ayo workout bentuk tubuh mu agar menjadi kekar dan bagus", "assets/images/workout.png", Colors.white, "lihat detail"),
                 ],
               ),
           ),
           Searching("Search"),
           SizedBox(height: 20,),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                MenuButton(title: "Cek Postur", icon: Icons.accessibility_new, color: Colors.deepOrangeAccent, onPressed: (){
-                  Navigator.pushNamed(context, '/');
-                }),
-                MenuButton(title: "Pola Hidup", icon: Icons.monitor_heart, color: Colors.deepOrangeAccent, onPressed: (){
-                  Navigator.pushNamed(context, '/');
-                }),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              MenuButton(
+                title: "Scan Postur",
+                icon: Icons.camera_alt,
+                color: Colors.blueAccent,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/cek-postur');
+                },
+              ),
+              MenuButton(
+                title: "Pola Hidup",
+                icon: Icons.monitor_heart,
+                color: Colors.blueAccent,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/rekomen-pola-hidup');
+                },
+              ),
+              MenuButton(
+                title: "Chatkuy",
+                icon: Icons.forum_rounded,
+                color: Colors.blueAccent,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/chatbot');
+                },
+              ),
+            ],
           ),
           SizedBox(height: 10,),
-          Text("Artikel",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Artikel",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              TextButton(onPressed: (){
+                Navigator.pushNamed(context, '/artikel');
+              }, child: Text("lihat semua"))
+            ],
           ),
           SizedBox(height: 10,),
           Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){

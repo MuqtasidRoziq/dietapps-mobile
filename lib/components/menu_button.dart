@@ -7,19 +7,25 @@ Widget MenuButton({
   required VoidCallback onPressed,
 }) {
   return Container(
-    margin: EdgeInsets.all(10),
-    height: 100,
-    width: 200,
-    child: ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white, size: 40,),
-      label: Text(title, style: TextStyle(color: Colors.white)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
+    padding: EdgeInsets.all(20),
+    child: Column(
+      children: [
+        IconButton(
+          onPressed: onPressed,
+          icon: Icon(icon, color: Colors.white, size: 40,),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.all(20),
+            shadowColor: Colors.grey,
+            elevation: 5
+          ),
         ),
-      ),
+        SizedBox(height: 5,),
+        Text(title, style: TextStyle(fontSize: 15),)
+      ],
     ),
   );
 }
