@@ -57,7 +57,9 @@ class _HomepageState extends State<Homepage> {
                 ],
               ),
           ),
-          Searching("Search"),
+          Searching("Search", (){
+            
+          }),
           SizedBox(height: 20,),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

@@ -11,27 +11,49 @@ class _ChatBotState extends State<ChatBot> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: Center(
-        child: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Center(
-                child: Text("Chatbot", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),)),
-            ),
-            
-          ],
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          "Chatkuy", 
+          style: TextStyle(
+            fontWeight: FontWeight.bold
+          ),
         ),
       ),
-      bottomSheet: Padding(
-        padding: const EdgeInsets.all(10),
-        child: TextField(
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(20)
-            ),
-            label: Text("silahkan tanya tanya disini"),
+      body: Container(
+        
+      ),
+      resizeToAvoidBottomInset: true,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding:  EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: "Silakan tanya di sini...",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    fillColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  onPressed: () {
+                    
+                  },
+                  icon: const Icon(Icons.send, color: Colors.white),
+                ),
+              ),
+            ],
           ),
         ),
       ),

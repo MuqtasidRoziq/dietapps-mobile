@@ -9,7 +9,7 @@ IklanCard(String title, String description, String img, Color color, String btn)
       child: Container(
         padding: EdgeInsets.all(20),
         height: 200,
-        width: 450,
+        width: 440,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

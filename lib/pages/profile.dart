@@ -7,7 +7,10 @@ class Profile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: BottomNav(currentIndex: 4),
+
+      bottomNavigationBar: BottomNav(
+        currentIndex: 3
+      ),
     );
   }
 }

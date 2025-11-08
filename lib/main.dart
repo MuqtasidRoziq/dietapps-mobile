@@ -6,6 +6,7 @@ import 'package:diet_apps/pages/chatbot.dart';
 import 'package:diet_apps/pages/get_started.dart';
 import 'package:diet_apps/pages/history.dart';
 import 'package:diet_apps/pages/homepage.dart';
+import 'package:diet_apps/pages/polahidup.dart';
 import 'package:diet_apps/pages/profile.dart';
 import 'package:flutter/material.dart';
 
@@ -28,7 +29,8 @@ class DietApps extends StatelessWidget {
         '/chatbot' : (context) => ChatBot(),
         '/artikel' : (context) => AllArticle(),
         '/riwayat' : (context) => History(),
-        '/profile' : (context) => Profile()
+        '/profile' : (context) => Profile(),
+        '/rekomen-pola-hidup' : (context) => RePolahidup()
       },
     );
   }
