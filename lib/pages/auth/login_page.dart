@@ -1,3 +1,4 @@
+import 'package:diet_apps/components/snackbar.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
@@ -48,6 +49,7 @@ class LoginPage extends StatelessWidget {
             SizedBox(height: 30,),
             ElevatedButton(onPressed: (){
               Navigator.pushNamed(context, '/homepage');
+              ShowAlert(context, "anda berhasil login", Colors.green);
             }, child: Text("Login"),style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 20),
                 backgroundColor: Colors.blue,
