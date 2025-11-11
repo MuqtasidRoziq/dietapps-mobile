@@ -43,7 +43,7 @@ class CekPostur extends StatelessWidget {
                 icon: Icons.upload_file, 
                 color: Colors.blueAccent, 
                 onPressed: (){
-
+                  Navigator.pushNamed(context, '/result-scan');
                 }
               ),
               MenuButton(
@@ -51,7 +51,7 @@ class CekPostur extends StatelessWidget {
                 icon: Icons.camera_alt, 
                 color: Colors.blueAccent, 
                 onPressed: (){
-
+                  Navigator.pushNamed(context, '/opencamera');
                 }
               ),
             ],

@@ -16,7 +16,7 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, //(0xFFD5ECF4),
+      backgroundColor: Colors.white,
       body: Center(
         child: ListView(
           padding: EdgeInsets.all(10),
@@ -104,19 +104,19 @@ class _HomepageState extends State<Homepage> {
           ),
           SizedBox(height: 10,),
           Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-
+            Navigator.pushNamed(context, "/details-article");
           }),
           Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-
+            Navigator.pushNamed(context, "/details-article");
           }),
           Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-
+            Navigator.pushNamed(context, "/details-article");
           }),
           Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-
+            Navigator.pushNamed(context, "/details-article");
           }),
           Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-
+            Navigator.pushNamed(context, "/details-article");
           }),
           ],
         ),

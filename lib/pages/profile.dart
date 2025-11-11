@@ -78,7 +78,9 @@ class Profile extends StatelessWidget {
                 ),
               ),
             ),
+            SizedBox(height: 10,)
           ],
+          
         ),
 
       bottomNavigationBar: BottomNav(currentIndex: 3),
