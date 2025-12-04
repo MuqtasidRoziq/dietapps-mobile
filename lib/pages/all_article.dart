@@ -23,46 +23,34 @@ class AllArticle extends StatelessWidget {
             
           }),
           SizedBox(height: 10,),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "google telah mendapatkan anugerahnya dalam menciptakan ai", "12 Juny 2025", (){
+          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
             Navigator.pushNamed(context, "/details-article");
           }),
         ],

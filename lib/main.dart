@@ -1,4 +1,5 @@
 import 'package:diet_apps/pages/all_article.dart';
+import 'package:diet_apps/pages/auth/forgot_password.dart';
 import 'package:diet_apps/pages/auth/login_page.dart';
 import 'package:diet_apps/pages/auth/register_page.dart';
 import 'package:diet_apps/pages/cekpostur.dart';
@@ -30,6 +31,7 @@ class DietApps extends StatelessWidget {
         '/' : (context) => GetStarted(),
         '/register' : (context) => RegisterPage(),
         '/login' : (context) => LoginPage(),
+        '/forgot-password' : (context) => ForgotPassword(),
         '/homepage' : (context) => Homepage(),
         '/cek-postur' : (context) => CekPostur(),
         '/chatbot' : (context) => ChatBot(),

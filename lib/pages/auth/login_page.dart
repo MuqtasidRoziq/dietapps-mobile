@@ -1,8 +1,13 @@
 import 'package:diet_apps/components/snackbar.dart';
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -10,6 +15,7 @@ class LoginPage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         title: Text("Login", style: TextStyle(fontWeight: FontWeight.bold),),
+        backgroundColor: Colors.white,
       ),
       body: Center(
         child: ListView(
@@ -29,7 +35,7 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(
                 prefixIcon: Icon(Icons.lock_outline),
                 label: Text("enter your password"),
-                suffixIcon: Icon(Icons.visibility_off_outlined),
+                suffixIcon: ,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                 )
@@ -38,13 +44,14 @@ class LoginPage extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(onPressed: (){
-
+                Navigator.pushNamed(context, '/forgot-password');
               }, style: TextButton.styleFrom(
                 padding: EdgeInsets.zero,
                 minimumSize: Size(50, 30),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 
-              ),child: Text("forgot password?", style: TextStyle(color: Colors.blue),)),
+              ),child: Text("forgot password?", style: TextStyle(color: Colors.blue),)
+              ),
             ),
             SizedBox(height: 30,),
             ElevatedButton(onPressed: (){
