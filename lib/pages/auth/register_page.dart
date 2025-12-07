@@ -1,88 +1,204 @@
+import 'package:diet_apps/components/snackbar.dart';
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class RegisterPage extends StatelessWidget {
+class RegisterPage extends StatefulWidget {
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+
+  final TextEditingController fullnameController = TextEditingController();
+  final TextEditingController jkController = TextEditingController();
+  final TextEditingController alergiMakanController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+
+  bool isPasswordVisible = false;
+  bool isLoading = false;
+
+  Future<void> Register() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    if (passwordController.text != confirmPasswordController.text) {
+      setState(() {
+        isLoading = false;
+      });
+      ShowAlert(context, "Password tidak sama harap cek kembali", Colors.red, 5);
+      return;
+    }
+
+    final url = Uri.parse(
+      "http://192.168.18.38:5000/api/auth/register",
+    );
+
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "fullname": fullnameController.text,
+        "jenis_kelamin": jkController.text,
+        "alergi_makan": alergiMakanController.text,
+        "email": emailController.text,
+        "password": passwordController.text,
+      }),
+    );
+    final data = jsonDecode(response.body);
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (data["success"] == true) {
+      ShowAlert(context, data["message"], Colors.green, 2);
+      Navigator.pushNamed(context, '/login');
+    } else {
+      ShowAlert(context, data["message"], Colors.red, 5);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("Sign Up", style: TextStyle(fontWeight: FontWeight.bold),),
-      ),
-      body: ListView(
-          padding: EdgeInsets.all(50),
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.person_outline,),
-                label: Text("enter your full name"),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                  Text("Register", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
+                  SizedBox(height: 20,),
+                  TextField(
+                    controller: fullnameController,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.person_outline),
+                      labelText: 'Full Name',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    initialValue: jkController.text.isEmpty ? null : jkController.text,
+                    items: ['Laki-laki', 'Perempuan']
+                        .map((value) => DropdownMenuItem(
+                              value: value,
+                              child: Text(value),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        jkController.text = value!;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.wc_outlined),
+                      labelText: 'Jenis Kelamin',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 20,),
+                  TextField(
+                    controller: alergiMakanController,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.no_food_outlined),
+                      labelText: 'Alergi Makanan',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 20,),
+                  TextField(
+                    controller: emailController,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.email_outlined),
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: !isPasswordVisible,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline),
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: !isPasswordVisible,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.lock_outline),
+                      labelText: 'Password',
+                      border: OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            isPasswordVisible = !isPasswordVisible;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: isLoading ? null : Register,
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 100),
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: isLoading
+                        ? SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 3,
+                            ),
+                          )
+                        : Text("Register"),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 20,),
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.email_outlined,),
-                label: Text("enter your email"),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-              ),
-            ),
-            SizedBox(height: 20,),
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.lock_outlined,),
-                label: Text("enter your password"),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-              ),
-            ),
-            SizedBox(height: 20,),
-            TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.lock_outlined,),
-                label: Text("enter your confirm password"),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                )
-              ),
-            ),
-            CheckboxListTile(
-              value: false, 
-              onChanged: (value){}, 
-              title: Text("I agree to the dietkuys terms of service and privacy police", style: TextStyle(fontSize: 15),),
-              controlAffinity: ListTileControlAffinity.leading,
-              contentPadding: EdgeInsets.zero,
-            ),
-            SizedBox(height: 50,),
-            ElevatedButton(onPressed: (){
-              Navigator.pushNamed(context, '/login');
-            }, child: Text("Sign Up"),style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                shape :RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(32)
-                )
-              ) , 
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("Don't have an account?"),
-                TextButton(onPressed: (){
-                  Navigator.pushNamed(context, '/login');
-                }, child: Text("Login", style: TextStyle(color: Colors.blue),)
-                )
-              ],
             ),
           ],
         ),
+      )
     );
   }
 }

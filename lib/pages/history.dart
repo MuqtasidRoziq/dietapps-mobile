@@ -63,7 +63,7 @@ class _HistoryState extends State<History> {
                 Row(
                   children: [
                     Text(
-                      "Perkembangan Berat Badan (kg)",
+                      "Perkembangan Berat Badan Per Bulan",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -113,11 +113,11 @@ class _HistoryState extends State<History> {
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) {
-                              const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+                              const month = ['january', 'february', 'march', 'april', 'may', 'june', 'july'];
                               return Padding(
                                 padding: const EdgeInsets.only(top: 5),
                                 child: Text(
-                                  days[value.toInt() % days.length],
+                                  month[value.toInt() % month.length],
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               );

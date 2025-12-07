@@ -60,7 +60,7 @@ class _RekomendasiCardState extends State<RekomendasiCard> {
                     onPressed: () {
                       setState(() {
                         done = !done;
-                        done? ShowAlert(context, "Anda Sudah Melakukan "+widget.title, Colors.green): null;
+                        done? ShowAlert(context, "Anda Sudah Melakukan "+widget.title, Colors.green, 2): null;
                       });
                     },
                     icon: Icon(done ? Icons.check : Icons.access_time),

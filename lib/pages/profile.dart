@@ -58,7 +58,7 @@ class Profile extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.pushNamed(context, '/');
-                ShowAlert(context, "berhasi logout", Colors.green);
+                ShowAlert(context, "berhasi logout", Colors.green, 2);
               },
               icon: Icon(Icons.logout, color: Colors.white),
               label: Text(

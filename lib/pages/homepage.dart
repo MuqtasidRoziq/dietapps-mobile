@@ -57,7 +57,7 @@ class _HomepageState extends State<Homepage> {
                 ],
               ),
           ),
-          Searching("Search", (){
+          Searching("Search...", (){
             
           }),
           SizedBox(height: 20,),

@@ -66,7 +66,7 @@ class _RePolahidupState extends State<RePolahidup> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           CategoryBar(
             categories: ["Makanan", "Olahraga", "Tidur"],
             selectedCategory: selectedCategory,
@@ -76,7 +76,7 @@ class _RePolahidupState extends State<RePolahidup> {
               });
             },
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10),
           Expanded(
             child: ListView(
               children: (recommendations[selectedCategory] ?? [])

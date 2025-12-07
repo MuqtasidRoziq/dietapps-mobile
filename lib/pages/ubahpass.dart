@@ -49,7 +49,7 @@ class _UbahpassState extends State<Ubahpass> {
           ElevatedButton.icon(
             onPressed: () {
               Navigator.pushNamed(context, '/profile');
-              ShowAlert(context, "berhasil merubah password", Colors.green);
+              ShowAlert(context, "berhasil merubah password", Colors.green, 2);
             },
             label: const Text("Simpan"),
             style: ElevatedButton.styleFrom(

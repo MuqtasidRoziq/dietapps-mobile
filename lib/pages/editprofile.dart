@@ -71,7 +71,7 @@ class _EditprofileState extends State<Editprofile> {
               ElevatedButton.icon(
                 onPressed: (){
                   Navigator.pushNamed(context, '/profile');
-                  ShowAlert(context, "update profile berhasil", Colors.green);
+                  ShowAlert(context, "update profile berhasil", Colors.green, 2);
                 },
                 label: const Text("Simpan"),
                 style: ElevatedButton.styleFrom(

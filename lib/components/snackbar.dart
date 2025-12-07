@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-ShowAlert(BuildContext context, String title, Color color){
+ShowAlert(BuildContext context, String title, Color color, int duration){
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(title),
@@ -9,7 +9,7 @@ ShowAlert(BuildContext context, String title, Color color){
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(20))
       ),
-      duration: Duration(seconds: 1),
+      duration: Duration(seconds: duration),
     )
   );
 }
