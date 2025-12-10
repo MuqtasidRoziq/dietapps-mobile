@@ -9,6 +9,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
@@ -22,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
     });
     
     final url = Uri.parse(
-      "http://192.168.18.38:5000/api/auth/login",
+      "http://127.0.0.1:5000/api/auth/login",
     );
 
     final response = await http.post(

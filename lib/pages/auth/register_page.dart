@@ -13,12 +13,12 @@ class _RegisterPageState extends State<RegisterPage> {
 
   final TextEditingController fullnameController = TextEditingController();
   final TextEditingController jkController = TextEditingController();
-  final TextEditingController alergiMakanController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
   bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
   bool isLoading = false;
 
   Future<void> Register() async {
@@ -35,7 +35,7 @@ class _RegisterPageState extends State<RegisterPage> {
     }
 
     final url = Uri.parse(
-      "http://192.168.18.38:5000/api/auth/register",
+      "http://127.0.0.1:5000/api/auth/register",
     );
 
     final response = await http.post(
@@ -44,7 +44,6 @@ class _RegisterPageState extends State<RegisterPage> {
       body: jsonEncode({
         "fullname": fullnameController.text,
         "jenis_kelamin": jkController.text,
-        "alergi_makan": alergiMakanController.text,
         "email": emailController.text,
         "password": passwordController.text,
       }),
@@ -110,15 +109,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   SizedBox(height: 20,),
                   TextField(
-                    controller: alergiMakanController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.no_food_outlined),
-                      labelText: 'Alergi Makanan',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 20,),
-                  TextField(
                     controller: emailController,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.email_outlined),
@@ -151,20 +141,20 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(height: 20),
                   TextField(
                     controller: confirmPasswordController,
-                    obscureText: !isPasswordVisible,
+                    obscureText: !isConfirmPasswordVisible,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.lock_outline),
-                      labelText: 'Password',
+                      labelText: 'Confirm Password',
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          isPasswordVisible
+                          isConfirmPasswordVisible
                               ? Icons.visibility
                               : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
-                            isPasswordVisible = !isPasswordVisible;
+                            isConfirmPasswordVisible = !isConfirmPasswordVisible;
                           });
                         },
                       ),
