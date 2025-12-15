@@ -2,8 +2,9 @@ import 'package:diet_apps/components/article.dart';
 import 'package:diet_apps/components/card_iklan.dart';
 import 'package:diet_apps/components/menu_button.dart';
 import 'package:diet_apps/components/search.dart';
-import 'package:flutter/material.dart';
 import 'package:diet_apps/components/buttom_navigation.dart';
+import 'package:diet_apps/components/alert-notif.dart';
+import 'package:flutter/material.dart' hide Notification;
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -69,7 +70,7 @@ class _HomepageState extends State<Homepage> {
                 icon: Icons.camera_alt,
                 color: Colors.blueAccent,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/cek-postur');
+                  Notification(context, "Peringatan!", "Pastikan postur tubuh anda terlihat secara penuh dan jelas pada kamera sebelum melanjutkan.", '/opencamera');
                 },
               ),
               MenuButton(
