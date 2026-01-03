@@ -1,7 +1,5 @@
-import 'package:diet_apps/components/snackbar.dart';
+import 'package:diet_apps/controllers/auth/login_controller.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   @override
@@ -9,82 +7,63 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final LoginController loginController = LoginController();
 
   bool isPasswordVisible = false;
   bool isLoading = false;
-
-  Future<void> loginUser() async {
-
-    setState(() {
-      isLoading = true;
-    });
-    
-    final url = Uri.parse(
-      "http://127.0.0.1:5000/api/auth/login",
-    );
-
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": emailController.text,
-        "password": passwordController.text,
-      }),
-    );
-
-    final data = jsonDecode(response.body);
-    
-    setState(() {
-      isLoading = false;
-    });
-
-    if (data["success"] == true) {
-      ShowAlert(context, data["message"], Colors.green, 2);
-      Navigator.pushNamed(context, '/homepage');
-    } else {
-      ShowAlert(context, data["message"], Colors.red, 5);
-    }
-  }
-
-  Future<void> loginUserByGoogle() async {
-    
-  }
+  bool isGoogleLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey[50],
+        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Card(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 15,
+            right: 15,
+            top: 15,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 15,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 420,
+            ),
+            child: Card(
+              color: Colors.white,
               elevation: 5,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       "Login",
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 26,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 25),
                     TextField(
                       controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.email_outlined),
                         labelText: 'Email',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -94,7 +73,9 @@ class _LoginPageState extends State<LoginPage> {
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock_outline),
                         labelText: 'Password',
-                        border: OutlineInputBorder(),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         suffixIcon: IconButton(
                           icon: Icon(
                             isPasswordVisible
@@ -115,39 +96,51 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {
                           Navigator.pushNamed(context, '/forgot-password');
                         },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size(50, 30),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          "forgot password?",
-                          style: TextStyle(color: Colors.blue),
-                        ),
+                        child: Text("Forgot password?"),
                       ),
                     ),
                     SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : loginUser,
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 20, horizontal: 100),
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: isLoading
+                            ? null
+                            : () {
+                                loginController.login(
+                                  context,
+                                  emailController.text,
+                                  passwordController.text,
+                                  (loading) {
+                                    setState(() {
+                                      isLoading = loading;
+                                    });
+                                  },
+                                );
+                              },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 18),
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
-                      ),
-                      child: isLoading
-                          ? SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3,
+                        child: isLoading
+                            ? SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 3,
+                                ),
+                              )
+                            : Text(
+                                "Login",
+                                style: TextStyle(fontSize: 16),
                               ),
-                            )
-                          : Text("Login"),
+                      ),
                     ),
+                    SizedBox(height: 15),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -156,46 +149,59 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () {
                             Navigator.pushNamed(context, '/register');
                           },
-                          child: Text(
-                            "Sign Up",
-                            style: TextStyle(color: Colors.blue),
-                          ),
+                          child: Text("Sign Up"),
                         ),
                       ],
                     ),
                     Row(
                       children: [
-                        Expanded(
-                          child: Divider(color: Colors.grey, thickness: 1),
+                        Expanded(child: Divider()),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("or"),
                         ),
-                        Padding(padding: EdgeInsets.all(10), child: Text("or")),
-                        Expanded(
-                          child: Divider(color: Colors.grey, thickness: 1),
-                        ),
+                        Expanded(child: Divider()),
                       ],
                     ),
-                    SizedBox(height: 10),
-                    ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: Image.asset(
-                        "assets/images/google_logo.png",
-                        height: 24,
-                        width: 24,
-                      ),
-                      label: Text(
-                        "Login with Google",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
-                        side: BorderSide(color: Colors.grey),
-                        padding: EdgeInsets.symmetric(
-                          vertical: 20,
-                          horizontal: 20,
+                    SizedBox(height: 15),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () { isGoogleLoading ? null:
+                          loginController.signInWithGoogle(
+                            context,
+                            (loading) {
+                              setState(() {
+                                isGoogleLoading = loading;
+                              });
+                            },
+                          );
+                        },
+                        icon: isGoogleLoading ? Container()
+                        : Image.asset(
+                          "assets/images/google_logo.png",
+                          height: 24,
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
+                        label: isGoogleLoading ? SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.black,
+                            strokeWidth: 3,
+                          ),
+                        ) :
+                        Text(
+                          "Login with Google",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          side: BorderSide(color: Colors.grey),
+                          padding: EdgeInsets.symmetric(vertical: 18),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       ),
                     ),
@@ -203,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

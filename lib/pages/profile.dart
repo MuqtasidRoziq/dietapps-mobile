@@ -1,10 +1,42 @@
 import 'package:diet_apps/components/buttom_navigation.dart';
 import 'package:diet_apps/components/card_settings.dart';
 import 'package:diet_apps/components/snackbar.dart';
+import 'package:diet_apps/controllers/auth/logout.dart';
+import 'package:diet_apps/controllers/get_user_data.dart';
 import 'package:flutter/material.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   const Profile({super.key});
+
+  @override
+  State<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
+
+  final GetUserData getUserDataController = GetUserData();
+  final logoutController = logout;
+
+  String? photo;
+  String fullname = "Guest";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final data = await getUserDataController.getUserData();
+      setState(() {
+        fullname = data['fullname'] ?? "Guest"; 
+        photo = data['photo'];
+      });
+    } catch (e) {
+      print("Error loading data: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,16 +61,20 @@ class Profile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        radius: 50,
-                        backgroundImage: AssetImage(
-                          'assets/images/profile_picture.png',
-                        ),
+                        backgroundColor: Colors.grey[200],
+                        radius: 55,
+                        backgroundImage: (photo != null && photo!.isNotEmpty) 
+                            ? NetworkImage(photo!) 
+                            : null,
+                          child: (photo == null || photo!.isEmpty) 
+                            ? const Icon(Icons.person, color: Colors.white) 
+                            : null,
                       ),
                       SizedBox(height: 10),
                       Text(
-                        "Muqtasid Roziq",
+                        fullname,
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 25,
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
                         ),
@@ -56,8 +92,10 @@ class Profile extends StatelessWidget {
             ]),
             SizedBox(height: 30),
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.pushNamed(context, '/');
+              onPressed: () async{
+                await logoutController;
+                if (!mounted) return;
+                Navigator.pushReplacementNamed(context, '/login');
                 ShowAlert(context, "berhasi logout", Colors.green, 2);
               },
               icon: Icon(Icons.logout, color: Colors.white),

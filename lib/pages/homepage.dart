@@ -4,6 +4,7 @@ import 'package:diet_apps/components/menu_button.dart';
 import 'package:diet_apps/components/search.dart';
 import 'package:diet_apps/components/buttom_navigation.dart';
 import 'package:diet_apps/components/alert-notif.dart';
+import 'package:diet_apps/controllers/get_user_data.dart';
 import 'package:flutter/material.dart' hide Notification;
 
 class Homepage extends StatefulWidget {
@@ -14,6 +15,30 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+
+  final GetUserData getUserDataController = GetUserData();
+
+  String fullname = "guest";
+  String? photo;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final data = await getUserDataController.getUserData();
+      setState(() {
+        fullname = data['fullname'] ?? "Guest"; 
+        photo = data['photo'];
+      });
+    } catch (e) {
+      print("Error loading data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,12 +55,27 @@ class _HomepageState extends State<Homepage> {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        radius: 30,
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.blue,
+                            radius: 35,
+                          ),
+                          CircleAvatar(
+                            backgroundColor: Colors.grey[200],
+                            radius: 33,
+                            backgroundImage: (photo != null && photo!.isNotEmpty) 
+                                ? NetworkImage(photo!) 
+                                : null,
+                            child: (photo == null || photo!.isEmpty) 
+                                ? const Icon(Icons.person, color: Colors.white) 
+                                : null,
+                          )
+                        ],
                       ),
                       SizedBox(width: 10,),
-                      Text("Username")
+                      Text(fullname)
                     ],
                   ),
                   IconButton(onPressed: (){
@@ -70,7 +110,7 @@ class _HomepageState extends State<Homepage> {
                 icon: Icons.camera_alt,
                 color: Colors.blueAccent,
                 onPressed: () {
-                  Notification(context, "Peringatan!", "Pastikan postur tubuh anda terlihat secara penuh dan jelas pada kamera sebelum melanjutkan.", '/opencamera');
+                  Notification(context, "Peringatan!", "Pastikan postur tubuh anda terlihat secara penuh dan jelas pada kamera sebelum melanjutkan. gunakan baju yang press body", '/opencamera');
                 },
               ),
               MenuButton(
