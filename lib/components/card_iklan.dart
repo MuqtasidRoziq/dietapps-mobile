@@ -1,36 +1,57 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-IklanCard(String title, String description, String img, Color color, String btn) {
-  return Center(
-    child: Card(
-      elevation: 5,
-      margin: EdgeInsets.all(20),
-      child: Container(
-        padding: EdgeInsets.all(20),
-        height: 200,
-        width: 440,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),),
-                      Text(description, style: TextStyle(fontSize: 14),),
-                    ],
-                  ), 
-                ]
-              ),
+Widget buildModernIklan(BuildContext context, String title, String desc, String img, Color bgColor) {
+  double screenWidth = MediaQuery.of(context).size.width;
+
+  return Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10), // Memberi jarak agar card tidak nempel pinggir
+    child: Container(
+      width: screenWidth, // Otomatis memenuhi lebar layar
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          )
+        ],
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: (screenWidth - 80) * 0.5, // Menyesuaikan lebar teks agar tidak nabrak gambar
+                  child: Text(desc, style: const TextStyle(fontSize: 13, color: Colors.black54), maxLines: 3),
+                ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text("Detail", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                )
+              ],
             ),
-            Image.asset(img, width: 150,)
-          ],
-        ),
+          ),
+          Positioned(
+            right: 10,
+            bottom: 10,
+            child: Image.asset(img, height: 140),
+          )
+        ],
       ),
     ),
   );

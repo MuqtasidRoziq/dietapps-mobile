@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:diet_apps/main.dart'; // Pastikan 'cameras' ada di sini
+import 'package:diet_apps/main.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class OpenCamera extends StatefulWidget {
@@ -12,12 +13,12 @@ class OpenCamera extends StatefulWidget {
 
 class _OpenCameraState extends State<OpenCamera> {
   CameraController? _controller;
-  int _selectedCameraIndex = 0; // 0: Belakang, 1: Depan
-  int _currentStep = 1; // 1: Depan, 2: Samping, 3: Belakang
+  int _selectedCameraIndex = 0; 
+  int _currentStep = 1; 
   
-  List<String> _capturedPaths = []; // Penyimpanan sementara untuk 3 foto
+  List<XFile> _capturedPaths = []; 
   bool _isPreviewMode = false;
-  String? _currentPreviewPath;
+  XFile? _currentPreviewPath;
 
   @override
   void initState() {
@@ -28,22 +29,42 @@ class _OpenCameraState extends State<OpenCamera> {
   Future<void> _initCamera(int index) async {
     if (cameras.isEmpty) return;
     
-    // Matikan controller lama sebelum membuat yang baru
-    if (_controller != null) {
-      await _controller!.dispose();
+    // Dispose controller lama dengan aman
+    final oldController = _controller;
+    _controller = null; // Set null dulu agar UI tidak mencoba merender preview yang lama
+    if (oldController != null) {
+      await oldController.dispose();
     }
 
-    _controller = CameraController(
+    // Buat controller baru
+    final CameraController cameraController = CameraController(
       cameras[index], 
       ResolutionPreset.high, 
-      enableAudio: false
+      enableAudio: false,
+      imageFormatGroup: ImageFormatGroup.jpeg, // Tambahan untuk kompatibilitas HP
     );
 
+    _controller = cameraController;
+
     try {
-      await _controller!.initialize();
-      if (mounted) setState(() {});
+      await cameraController.initialize();
+      
+      // Web specific lock
+      if (kIsWeb) {
+        try {
+          await cameraController.lockCaptureOrientation();
+        } catch (e) {
+          debugPrint("Orientasi tidak bisa dikunci: $e");
+        }
+      }
+
+      if (mounted) {
+        setState(() {});
+      }
     } catch (e) {
-      debugPrint("Gagal inisialisasi kamera: $e");
+      if (mounted) {
+        debugPrint('Error Kamera: $e');
+      }
     }
   }
 
@@ -56,29 +77,53 @@ class _OpenCameraState extends State<OpenCamera> {
 
   // Ambil Foto
   Future<void> _takePicture() async {
-    try {
-      final image = await _controller!.takePicture();
-      setState(() {
-        _currentPreviewPath = image.path;
-        _isPreviewMode = true;
-      });
-    } catch (e) {
-      debugPrint("Error ambil foto: $e");
-    }
+    if (_controller == null || !_controller!.value.isInitialized || _controller!.value.isTakingPicture) {
+        return;
+      }
+
+      try {
+        final image = await _controller!.takePicture();
+        setState(() {
+          _currentPreviewPath = image;
+          _isPreviewMode = true;
+        });
+      } catch (e) {
+        debugPrint("Error ambil foto: $e");
+        // Jika error, coba reset kamera
+        _initCamera(_selectedCameraIndex);
+      }
   }
 
   // Simpan foto dan lanjut ke tahap berikutnya
-  void _confirmPhoto() {
+  void _confirmPhoto() async {
+    if (_currentPreviewPath == null) return;
+
+      // Tambahkan path ke list
     _capturedPaths.add(_currentPreviewPath!);
+
     if (_currentStep < 3) {
       setState(() {
         _currentStep++;
         _isPreviewMode = false;
         _currentPreviewPath = null;
       });
+        // Inisialisasi ulang kamera untuk langkah berikutnya
+      await _initCamera(_selectedCameraIndex);
     } else {
-      // PINDAH KE HALAMAN ANALISIS (Bawa 3 file untuk MediaPipe)
-      Navigator.pushReplacementNamed(context, '/inputbmi', arguments: _capturedPaths);
+        // SEBELUM PINDAH HALAMAN: Matikan kamera agar resource di laptop/HP lepas
+      if (_controller != null) {
+        await _controller!.dispose();
+        _controller = null; 
+      }
+
+      if (!mounted) return;
+        
+        // PINDAH KE HALAMAN ANALISIS
+      Navigator.pushReplacementNamed(
+        context, 
+        '/inputbmi', 
+        arguments: _capturedPaths
+      );
     }
   }
 
@@ -119,9 +164,13 @@ class _OpenCameraState extends State<OpenCamera> {
   }
 
   Widget _buildLiveCamera() {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return const Center(child: CircularProgressIndicator(color: Colors.white));
+    }
+
     return SizedBox.expand(
       child: FittedBox(
-        fit: BoxFit.cover, // FIX: Anti-Gepeng
+        fit: BoxFit.cover,
         child: SizedBox(
           width: _controller!.value.previewSize!.height,
           height: _controller!.value.previewSize!.width,
@@ -132,8 +181,12 @@ class _OpenCameraState extends State<OpenCamera> {
   }
 
   Widget _buildImagePreview() {
+    if (_currentPreviewPath == null) return const SizedBox.shrink();
+
     return SizedBox.expand(
-      child: Image.file(File(_currentPreviewPath!), fit: BoxFit.cover),
+      child: kIsWeb
+          ? Image.network(_currentPreviewPath!.path, fit: BoxFit.cover) // Solusi Web
+          : Image.file(File(_currentPreviewPath!.path), fit: BoxFit.cover), // Solusi HP
     );
   }
 
@@ -188,8 +241,14 @@ class _OpenCameraState extends State<OpenCamera> {
       ? Row( // MODE PREVIEW
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _actionButton(Icons.refresh, "Ulangi", Colors.grey[800]!, () {
-              setState(() => _isPreviewMode = false);
+            _actionButton(Icons.refresh, "Ulangi", Colors.grey[800]!, () async {
+              setState(() {
+                _isPreviewMode = false;
+                _currentPreviewPath = null;
+              });
+              
+              // PENTING: Inisialisasi ulang kamera untuk membangunkan sensor
+              await _initCamera(_selectedCameraIndex);
             }),
             _actionButton(Icons.check, "Gunakan", Colors.green, _confirmPhoto),
           ],
@@ -229,7 +288,7 @@ class _OpenCameraState extends State<OpenCamera> {
 
   String _getStepName() {
     if (_currentStep == 1) return "Tampak Depan";
-    if (_currentStep == 2) return "Tampak Samping";
-    return "Tampak Belakang";
+    if (_currentStep == 2) return "Tampak Samping Kanan";
+    return "Tampak Samping Kiri";
   }
 }

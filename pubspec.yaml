@@ -41,6 +41,7 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   shared_preferences: ^2.5.4
   google_sign_in: ^6.2.1
+  get: ^4.7.3
 
 dev_dependencies:
   flutter_test:

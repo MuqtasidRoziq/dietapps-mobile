@@ -1,29 +1,22 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 
-Widget menuCard(List<Widget> children) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            blurRadius: 8,
-            offset: const Offset(0, 3),
-          )
-        ],
+Widget buildFancyMenu(IconData icon, String title, Color color, VoidCallback onTap) {
+    return ListTile(
+      onTap: onTap,
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: color),
       ),
-      child: Column(children: children),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.grey),
     );
   }
 
-  Widget menuItem(BuildContext context, IconData icon, String text, VoidCallback onPressed) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.blue),
-      title: Text(text),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-      onTap: onPressed,
-    );
-  }
+Widget divider() {
+  return Divider(height: 1, indent: 70, endIndent: 20, color: Colors.grey[100]);
+}

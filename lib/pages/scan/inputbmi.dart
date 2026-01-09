@@ -1,3 +1,5 @@
+import 'package:camera/camera.dart';
+import 'package:diet_apps/components/snackbar.dart';
 import 'package:diet_apps/controllers/scan_controller.dart';
 import 'package:diet_apps/controllers/get_user_data.dart'; // Import class GetUserData kamu
 import 'package:flutter/material.dart';
@@ -17,7 +19,7 @@ class _inputbmiState extends State<inputbmi> {
   final ScanController _scanController = ScanController();
   final GetUserData _userDataService = GetUserData(); // Instance service kamu
 
-  Future<void> _processSubmit(List<String> imagePaths) async {
+  Future<void> _processSubmit(List<XFile> imagePaths) async {
     // 1. Validasi awal
     if (tinggiController.text.isEmpty || beratController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -52,19 +54,28 @@ class _inputbmiState extends State<inputbmi> {
 
       // 5. KIRIM KE CONTROLLER (Koneksi ke Flask)
       final result = await _scanController.uploadScanData(
+        context,
         userId: userId,
         gender: gender, // Akan di-map di controller (Laki-laki -> pria)
         tinggi: double.parse(tinggiController.text),
         berat: double.parse(beratController.text),
         alergi: alergiList,
-        imagePaths: imagePaths,
+        images: imagePaths,
       );
 
       if (!mounted) return;
-      Navigator.pop(context); // Tutup loading
+      Navigator.pop(context); 
 
-      // 6. PINDAH KE HASIL
-      Navigator.pushReplacementNamed(context, '/result-scan', arguments: result);
+      if (result != null && result['status'] == 'success') {
+        ShowAlert(context, "Analisis Berhasil!", Colors.green, 2);
+        Navigator.pushReplacementNamed(
+          context, 
+          '/result-scan', 
+          arguments: result['data']
+        );
+      } else {
+        print("Proses gagal atau terjadi kesalahan di server");
+      }
 
     } catch (e) {
       if (!mounted) return;
@@ -78,8 +89,8 @@ class _inputbmiState extends State<inputbmi> {
   @override
   Widget build(BuildContext context) {
     // Tangkap file dari halaman kamera
-    final List<String> capturedImages = 
-        ModalRoute.of(context)!.settings.arguments as List<String>;
+    final dynamic args = ModalRoute.of(context)!.settings.arguments;
+    final List<XFile> capturedImages = args is List<XFile> ? args : [];
 
     return Scaffold(
       appBar: AppBar(title: const Text("Analisis Postur & BMI")),
@@ -97,14 +108,20 @@ class _inputbmiState extends State<inputbmi> {
                     TextField(
                       controller: tinggiController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        hintText: "Masukan Tinggi Badan (Cm)",
+                        border: OutlineInputBorder()
+                        ),
                     ),
                     const SizedBox(height: 15),
                     _label("Berat Badan (kg)"),
                     TextField(
                       controller: beratController,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                      decoration: const InputDecoration(
+                        hintText: "Masukan Berat Badan (Kg)",
+                        border: OutlineInputBorder()
+                        ),
                     ),
                     const SizedBox(height: 15),
                     _label("Alergi Makanan (opsional)"),

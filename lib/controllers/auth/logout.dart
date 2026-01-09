@@ -17,32 +17,32 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(
 
 Future<void> logout(BuildContext context) async {
   try {
-    // 1. Cek apakah ada sesi Google yang aktif, jika ada keluarkan
-    // Ini tidak akan error meskipun user login dengan metode biasa
-    if (await _googleSignIn.isSignedIn()) {
-      await _googleSignIn.signOut();
-      // Opsional: Jika ingin benar-benar memutus koneksi akun dari aplikasi
-      // await _googleSignIn.disconnect(); 
+    // 1. Bersihkan Google Sign In dengan proteksi try-catch
+    try {
+      // Hanya jalankan jika library terdeteksi aktif
+      if (await _googleSignIn.isSignedIn()) {
+        await _googleSignIn.signOut();
+      }
+    } catch (googleError) {
+      print("Google Sign Out skipped/error: $googleError");
     }
 
-    // 2. Hapus Token JWT (Kunci utama akses ke Backend Flask)
-    // Baik login biasa maupun google, keduanya menyimpan token di sini
-    await storage.delete(key: 'jwt_token');
+    // 2. Hapus Token JWT
+    await storage.deleteAll(); // Gunakan deleteAll untuk keamanan extra
 
-    // 3. Hapus data profil user di SharedPreferences
+    // 3. Hapus SEMUA data lokal (PENTING untuk masalah foto tertukar)
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('email');
-    await prefs.remove('fullname');
-    await prefs.remove('photo');
-    // Atau gunakan await prefs.clear(); untuk menghapus semuanya
+    await prefs.clear(); 
 
-    // 4. Reset navigasi ke halaman Login
-    // (route) => false artinya user tidak bisa menekan tombol 'back' untuk kembali ke aplikasi
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-
-    ShowAlert(context, "Anda telah keluar", Colors.blue, 2);
+    // 4. Navigasi & Bersihkan History
+    if (context.mounted) {
+      // Gunakan pushNamedAndRemoveUntil agar user tidak bisa klik 'Back' ke profile
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      ShowAlert(context, "Anda telah keluar", Colors.blue, 2);
+    }
   } catch (e) {
-    print("Error Logout: $e");
-    ShowAlert(context, "Terjadi kesalahan saat logout", Colors.red, 3);
+    print("Error Logout Utama: $e");
+    // Tetap paksa pindah ke login jika error berat
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 }

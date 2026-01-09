@@ -1,11 +1,12 @@
 import 'package:diet_apps/components/article.dart';
 import 'package:diet_apps/components/card_iklan.dart';
 import 'package:diet_apps/components/menu_button.dart';
-import 'package:diet_apps/components/search.dart';
 import 'package:diet_apps/components/buttom_navigation.dart';
 import 'package:diet_apps/components/alert-notif.dart';
+import 'package:diet_apps/controllers/article_controller.dart';
 import 'package:diet_apps/controllers/get_user_data.dart';
 import 'package:flutter/material.dart' hide Notification;
+import 'package:get/get.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -15,9 +16,8 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-
+  final ArticleController articleController = Get.find<ArticleController>();
   final GetUserData getUserDataController = GetUserData();
-
   String fullname = "guest";
   String? photo;
 
@@ -31,8 +31,8 @@ class _HomepageState extends State<Homepage> {
     try {
       final data = await getUserDataController.getUserData();
       setState(() {
-        fullname = data['fullname'] ?? "Guest"; 
-        photo = data['photo'];
+        fullname = data['fullname'] ?? "Guest";
+        photo = data['profile_picture'];
       });
     } catch (e) {
       print("Error loading data: $e");
@@ -42,129 +42,154 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
+      backgroundColor: const Color(0xFFF8FAFB), // Background abu-abu sangat muda
+      body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 0),
           children: [
-            SizedBox(height: 20,),
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Stack(
-                        alignment: Alignment.center,
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.blue.withOpacity(0.2), width: 2),
+                        ),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey[200],
+                          radius: 35,
+                          backgroundImage: (photo != null)
+                              ? NetworkImage(photo!, headers: const {"ngrok-skip-browser-warning": "true"})
+                              : null,
+                          child: (photo == null || photo!.isEmpty)
+                              ? const Icon(Icons.person, color: Colors.grey)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.blue,
-                            radius: 35,
+                          const Text("Halo, Selamat pagi", style: TextStyle(color: Colors.grey, fontSize: 14)),
+                          Text(
+                            fullname,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                           ),
-                          CircleAvatar(
-                            backgroundColor: Colors.grey[200],
-                            radius: 33,
-                            backgroundImage: (photo != null && photo!.isNotEmpty) 
-                                ? NetworkImage(photo!) 
-                                : null,
-                            child: (photo == null || photo!.isEmpty) 
-                                ? const Icon(Icons.person, color: Colors.white) 
-                                : null,
-                          )
                         ],
                       ),
-                      SizedBox(width: 10,),
-                      Text(fullname)
                     ],
                   ),
-                  IconButton(onPressed: (){
-                    Navigator.pushNamed(context, '');
-                  }, icon: Icon(Icons.notifications_none_outlined, size: 25,))
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+                    ),
+                    child: IconButton(
+                      onPressed: () => Navigator.pushNamed(context, ''),
+                      icon: const Icon(Icons.notifications_active_outlined, color: Colors.blueAccent),
+                    ),
+                  )
                 ],
               ),
             ),
-            Text("Rekomendasi Hari Ini",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
 
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 5),
+              child: Text(
+                "Rekomendasi Hari Ini",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
+
+            SizedBox(
+              height: 210, // Sesuaikan dengan tinggi card + padding
+              child: PageView(
+                controller: PageController(viewportFraction: 1.0), // 1.0 artinya 1 card full layar
                 children: [
-                  IklanCard("Lari Pagi", "ayo semangat sangan lupa lari jaga tubuhmu", "assets/images/run_iklan.png", Colors.white, "lihat detail"),
-                  IklanCard("Sarapan", "jangan lupa sarapan biar hari hari mu tidak lemas", "assets/images/sarapan.png", Colors.white, "lihat detail"),
-                  IklanCard("Workout", "ayo workout bentuk tubuh mu agar menjadi kekar dan bagus", "assets/images/workout.png", Colors.white, "lihat detail"),
+                  buildModernIklan(context, "Analisis Postur AI", "Cek progres tubuhmu dengan presisi AI.", "assets/images/run_iklan.png", const Color(0xFFE3F2FD)),
+                  buildModernIklan(context, "Hidrasi Tubuh", "Minum air putih bantu metabolisme.", "assets/images/sarapan.png", const Color(0xFFE8F5E9)),
+                  buildModernIklan(context, "Pola Hidup", "Atur nutrisi harianmu di sini.", "assets/images/workout.png", const Color(0xFFFFF3E0)),
                 ],
               ),
-          ),
-          Searching("Search...", (){
+            ),
+
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, spreadRadius: 5)],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    buildMenuIcon(context, Icons.camera_alt_rounded, "Scan", Colors.blue, () {
+                      Notification(context, "Peringatan!", "Pastikan tubuh terlihat penuh dan gunakan baju press body.", '/opencamera');
+                    }),
+                    buildMenuIcon(context, Icons.monitor_heart_rounded, "Pola Hidup", Colors.redAccent, () {
+                      Navigator.pushNamed(context, '/rekomen-pola-hidup');
+                    }),
+                    buildMenuIcon(context, Icons.forum_rounded, "Chatkuy", Colors.teal, () {
+                      Navigator.pushNamed(context, '/chatbot');
+                    }),
+                  ],
+                ),
+              ),
+            ),
+
+            // --- ARTIKEL SECTION ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Artikel Terbaru", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  TextButton(
+                    onPressed: () => Navigator.pushNamed(context, '/artikel'),
+                    child: const Text("Lihat Semua", style: TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+                  )
+                ],
+              ),
+            ),
             
-          }),
-          SizedBox(height: 20,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              MenuButton(
-                title: "Scan Postur",
-                icon: Icons.camera_alt,
-                color: Colors.blueAccent,
-                onPressed: () {
-                  Notification(context, "Peringatan!", "Pastikan postur tubuh anda terlihat secara penuh dan jelas pada kamera sebelum melanjutkan. gunakan baju yang press body", '/opencamera');
+            Obx(() {
+              if (articleController.isLoading.value) {
+                return const Center(child: Padding(
+                  padding: EdgeInsets.all(20.0),
+                  child: CircularProgressIndicator(),
+                ));
+              }
+
+              // Menampilkan 5 artikel saja di Home
+              var displayArticles = articleController.homeArticles;
+
+              return ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: displayArticles.length,
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                itemBuilder: (context, index) {
+                  final article = displayArticles[index];
+                  return ArticleCard(
+                    article.img ?? '', 
+                    article.title, 
+                    article.date ?? '', 
+                    () => Navigator.pushNamed(context, "/details-article", arguments: article.id)
+                  );
                 },
-              ),
-              MenuButton(
-                title: "Pola Hidup",
-                icon: Icons.monitor_heart,
-                color: Colors.blueAccent,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/rekomen-pola-hidup');
-                },
-              ),
-              MenuButton(
-                title: "Chatkuy",
-                icon: Icons.forum_rounded,
-                color: Colors.blueAccent,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/chatbot');
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 10,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Artikel",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              TextButton(onPressed: (){
-                Navigator.pushNamed(context, '/artikel');
-              }, child: Text("lihat semua"))
-            ],
-          ),
-          SizedBox(height: 10,),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
+              );
+            }),
           ],
         ),
       ),
-      bottomNavigationBar: BottomNav(
-        currentIndex: 0,
-      ),
+      bottomNavigationBar: BottomNav(currentIndex: 0),
     );
   }
 }

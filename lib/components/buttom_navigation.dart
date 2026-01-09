@@ -17,7 +17,7 @@ class BottomNav extends StatelessWidget {
         Navigator.pushNamed(context, '/artikel');
         break;
       case 2:
-        Navigator.pushNamed(context, '/riwayat');
+        Navigator.pushNamed(context, '/report');
         break;
       case 3:
         Navigator.pushNamed(context, '/profile');
@@ -38,7 +38,7 @@ class BottomNav extends StatelessWidget {
       items:[
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
         BottomNavigationBarItem(icon: Icon(Icons.article), label: 'Artikel'),
-        BottomNavigationBarItem(icon: Icon(Icons.history), label: 'Riwayat'),
+        BottomNavigationBarItem(icon: Icon(Icons.report_outlined), label: 'Laporan'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
       ],
     );

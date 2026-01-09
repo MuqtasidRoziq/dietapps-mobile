@@ -46,9 +46,11 @@ class LoginController {
         await storage.write(key: 'jwt_token', value: data["access_token"]);
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('id', data["users"]["id"].toString());
         await prefs.setString('email', data["users"]["email"]);
+        await prefs.setString('gender', data["users"]["jenis_kelamin"] ?? "");
         await prefs.setString('fullname', data["users"]["fullname"]);
-        await prefs.setString('photo', data["users"]["photo"] ?? "");
+        await prefs.setString('profile_picture', data["users"]["profile_picture"] ?? "");
         
         ShowAlert(context, data["message"], Colors.green, 2);
         Navigator.pushReplacementNamed(context, '/homepage');
@@ -101,7 +103,7 @@ class LoginController {
         await prefs.setString('fullname', data["users"]["fullname"]);
         await prefs.setString('gender', data["users"]["jenis_kelamin"] ?? "");
         await prefs.setString('email', data["users"]["email"]);
-        await prefs.setString('photo', data["users"]["photo"] ?? "");
+        await prefs.setString('profile_picture', data["users"]["profile_picture"] ?? "");
 
         ShowAlert(context, "Login Google Berhasil", Colors.green, 2);
         Navigator.pushReplacementNamed(context, '/homepage');

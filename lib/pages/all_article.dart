@@ -1,61 +1,66 @@
+// all_article.dart
 import 'package:diet_apps/components/article.dart';
 import 'package:diet_apps/components/buttom_navigation.dart';
 import 'package:diet_apps/components/search.dart';
+import 'package:diet_apps/controllers/article_controller.dart'; // Import controller
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class AllArticle extends StatelessWidget {
   const AllArticle({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Mencari controller yang sudah aktif
+    final ArticleController articleController = Get.find<ArticleController>();
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: ListView(
-        padding: EdgeInsets.all(20),
-        children: [
-          Center(
-            child: Padding(
+      body: SafeArea(
+        child: Column( // Gunakan Column agar Search Bar tetap di atas saat scroll
+          children: [
+            const Padding(
               padding: EdgeInsets.all(20),
-              child: Text("Artikel", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),)
+              child: Text("Artikel", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
             ),
-          ),
-          Searching("cari artikel", (){
-            
-          }),
-          SizedBox(height: 10,),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-          Article('assets/images/google_logo.png', "ini judul artikel", "12 Juny 2025", (){
-            Navigator.pushNamed(context, "/details-article");
-          }),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Searching("cari artikel", (value) {
+                articleController.fetchAllArticles(query: value);
+              }),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Obx(() {
+                if (articleController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (articleController.allArticles.isEmpty) {
+                  return const Center(child: Text("Tidak ada artikel."));
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                  itemCount: articleController.allArticles.length,
+                  itemBuilder: (context, index) {
+                    final article = articleController.allArticles[index];
+                    return ArticleCard(
+                      article.img ?? '', 
+                      article.title, 
+                      article.date ?? '', 
+                      () {
+                        Navigator.pushNamed(context, "/details-article", arguments: article.id);
+                      }
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
-      bottomNavigationBar: BottomNav(currentIndex: 1),
+      bottomNavigationBar: const BottomNav(currentIndex: 1),
     );
   }
 }

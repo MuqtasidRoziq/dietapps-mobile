@@ -14,7 +14,7 @@ class GetStarted extends StatelessWidget {
             Text("login to stay in apps fit and healthy", style: TextStyle(fontSize: 14, color: Colors.grey),),
             SizedBox(height: 100,),
             ElevatedButton(onPressed: (){
-              Navigator.pushNamed(context, '/login');
+              Navigator.restorablePushNamed(context, '/login');
             }, child: Text("Login"),style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 100, vertical: 20),
                 backgroundColor: Colors.blue,
@@ -26,7 +26,7 @@ class GetStarted extends StatelessWidget {
             ),
             SizedBox(height: 20,),
             ElevatedButton(onPressed: (){
-              Navigator.pushNamed(context, '/register');
+              Navigator.restorablePushNamed(context, '/register');
             }, child: Text("Sign Up"),style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 94, vertical: 19),
                 backgroundColor: Colors.white,
