@@ -74,7 +74,7 @@ class _HomepageState extends State<Homepage> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Halo, Selamat pagi", style: TextStyle(color: Colors.grey, fontSize: 14)),
+                          const Text("Halo, Selamat Datang", style: TextStyle(color: Colors.grey, fontSize: 14)),
                           Text(
                             fullname,
                             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),

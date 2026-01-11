@@ -1,4 +1,6 @@
+import 'package:diet_apps/controllers/feedback_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class FeedbackUser extends StatefulWidget {
   const FeedbackUser({super.key});
@@ -10,11 +12,13 @@ class FeedbackUser extends StatefulWidget {
 class _FeedbackUserState extends State<FeedbackUser> {
   int _selectedRating = 0;
   final TextEditingController _commentController = TextEditingController();
+  
+  // Memanggil Controller yang sudah dibuat sebelumnya
+  final FeedbackController feedbackController = Get.put(FeedbackController());
 
-  // Fungsi untuk membangun deretan bintang rating
+  // Fungsi untuk membangun deretan bintang rating (Tetap seperti aslinya)
   Widget _buildRatingStars() {
     return Column(
-      // Mengatur arah penyusunan elemen ke bawah
       verticalDirection: VerticalDirection.down,
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -25,18 +29,15 @@ class _FeedbackUserState extends State<FeedbackUser> {
         const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          // Mengatur jarak antar bintang menjadi 0 agar presisi
           children: List.generate(5, (index) {
             return GestureDetector(
               onTap: () {
                 setState(() {
                   _selectedRating = index + 1;
                 });
-                // Menutup keyboard secara otomatis jika sedang terbuka saat pilih bintang
                 FocusScope.of(context).unfocus();
               },
               child: Padding(
-                // Memberikan jarak horizontal yang konsisten
                 padding: const EdgeInsets.symmetric(horizontal: 4.0),
                 child: Icon(
                   index < _selectedRating 
@@ -52,15 +53,13 @@ class _FeedbackUserState extends State<FeedbackUser> {
       ],
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // Agar keyboard tertutup saat klik di mana saja (luar input)
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: const Color(0xFFF8FAFB),
-        // Properti ini memastikan layar menyesuaikan saat keyboard muncul
         resizeToAvoidBottomInset: true,
         appBar: AppBar(
           title: const Text("Ulasan & Masukan", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
@@ -72,14 +71,12 @@ class _FeedbackUserState extends State<FeedbackUser> {
           ),
         ),
         body: SafeArea(
-          // KUNCI: Agar konten bisa di-scroll ke atas saat keyboard muncul
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-                // Icon Feedback
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -89,7 +86,6 @@ class _FeedbackUserState extends State<FeedbackUser> {
                   child: const Icon(Icons.rate_review_outlined, size: 60, color: Colors.blueAccent),
                 ),
                 const SizedBox(height: 24),
-                
                 const Text(
                   "Beri Kami Masukan!",
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
@@ -100,10 +96,7 @@ class _FeedbackUserState extends State<FeedbackUser> {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey, fontSize: 14),
                 ),
-                
                 const SizedBox(height: 32),
-
-                // Area Input & Rating dalam Card
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -124,13 +117,8 @@ class _FeedbackUserState extends State<FeedbackUser> {
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                       const SizedBox(height: 10),
-                      
-                      // Widget Rating Bintang
                       _buildRatingStars(),
-                      
                       const SizedBox(height: 20),
-                      
-                      // Kotak Pesan
                       TextField(
                         controller: _commentController,
                         maxLines: 5,
@@ -151,35 +139,45 @@ class _FeedbackUserState extends State<FeedbackUser> {
                     ],
                   ),
                 ),
-                
                 const SizedBox(height: 40),
 
-                // Tombol Submit
-                SizedBox(
+                // TOMBOL SUBMIT (Diintegrasikan dengan Controller)
+                Obx(() => SizedBox(
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Logika kirim ke API Flask
-                      final String msg = _commentController.text;
-                      print("Rating: $_selectedRating, Pesan: $msg");
-                      
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Terima kasih atas ulasan Anda!")),
-                      );
-                      Navigator.pop(context);
-                    },
+                    onPressed: feedbackController.isLoading.value 
+                      ? null 
+                      : () async {
+                        if (_selectedRating == 0) {
+                          Get.snackbar("Peringatan", "Silakan pilih rating bintang terlebih dahulu");
+                          return;
+                        }
+
+                        // Mengirim data ke database via Controller
+                        bool success = await feedbackController.sendFeedback(
+                          _selectedRating, 
+                          _commentController.text
+                        );
+
+                        if (success) {
+                          _commentController.clear();
+                          setState(() => _selectedRating = 0);
+                          // Kembali ke halaman sebelumnya setelah sukses
+                          Future.delayed(const Duration(seconds: 1), () => Get.back());
+                        }
+                      },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
-                    child: const Text("Kirim Sekarang", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: feedbackController.isLoading.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("Kirim Sekarang", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
-                ),
-                
-                // Tambahkan bantalan bawah agar saat keyboard muncul, konten tidak terlalu mepet
+                )),
                 const SizedBox(height: 20),
               ],
             ),

@@ -60,7 +60,7 @@ class DietApps extends StatelessWidget {
         '/previewphoto' : (context) => PreviewPage(imagePath: '', photoNumber: 0),
         '/inputbmi' : (context) => inputbmi(),
         '/result-scan' : (context) => ResultScan(),
-        '/details-article' : (context) => DetailsArtikel()
+        '/details-article' : (context) => DetailArticlePage()
       },
     );
   }

@@ -64,4 +64,28 @@ class ArticleController extends GetxController {
       isLoading(false);
     }
   }
+
+  var currentArticle = {}.obs;
+  var isLoadingDetail = false.obs;
+  var detailArticle = ArticleModel(id: 0, title: '').obs; // Menyimpan data artikel yang sedang dibuka
+
+ Future<void> getDetailArticle(int id) async {
+    try {
+      isLoadingDetail(true);
+      // Sesuaikan URL dengan route Flask Anda
+      final response = await http.get(
+        Uri.parse('${ConfigApi.baseUrl}/api/articles/$id'),
+        headers: ngrokHeaders,
+      );
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        detailArticle.value = ArticleModel.fromJson(data);
+      }
+    } catch (e) {
+      print("Error Detail: $e");
+    } finally {
+      isLoadingDetail(false);
+    }
+  }
 }
