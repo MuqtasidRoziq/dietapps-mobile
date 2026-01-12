@@ -67,7 +67,7 @@ class ArticleController extends GetxController {
 
   var currentArticle = {}.obs;
   var isLoadingDetail = false.obs;
-  var detailArticle = ArticleModel(id: 0, title: '').obs; // Menyimpan data artikel yang sedang dibuka
+  var detailArticle = ArticleModel(id: 0, title: '').obs;
 
  Future<void> getDetailArticle(int id) async {
     try {

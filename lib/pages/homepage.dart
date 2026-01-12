@@ -131,7 +131,7 @@ class _HomepageState extends State<Homepage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     buildMenuIcon(context, Icons.camera_alt_rounded, "Scan", Colors.blue, () {
-                      Notification(context, "Peringatan!", "Pastikan tubuh terlihat penuh dan gunakan baju press body.", '/opencamera');
+                      NotificationDialog(context, "Peringatan!", "Pastikan tubuh terlihat penuh dan gunakan baju press body.", '/opencamera');
                     }),
                     buildMenuIcon(context, Icons.monitor_heart_rounded, "Pola Hidup", Colors.redAccent, () {
                       Navigator.pushNamed(context, '/rekomen-pola-hidup');

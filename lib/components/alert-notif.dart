@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Notification(BuildContext context, String title, String content, String routes){
+NotificationDialog(BuildContext context, String title, String content, String routes){
   return showDialog(context: context, builder: (context) => AlertDialog(
     title: Text(title),
     content: Text(content),
