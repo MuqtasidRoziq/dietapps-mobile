@@ -49,7 +49,7 @@ class _EditprofileState extends State<Editprofile> {
       if (genderFromPrefs == "Laki-laki" || genderFromPrefs == "Perempuan") {
         _selectedGender = genderFromPrefs;
       } else {
-        _selectedGender = null; // Set null jika data aneh/kosong agar tidak crash
+        _selectedGender = null; 
       }
 
       _userProfilePicName = prefs.getString('profile_picture');

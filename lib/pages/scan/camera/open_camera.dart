@@ -29,7 +29,6 @@ class _OpenCameraState extends State<OpenCamera> {
   Future<void> _initCamera(int index) async {
     if (cameras.isEmpty) return;
     
-    // Dispose controller lama dengan aman
     final oldController = _controller;
     _controller = null; // Set null dulu agar UI tidak mencoba merender preview yang lama
     if (oldController != null) {

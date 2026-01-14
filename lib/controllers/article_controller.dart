@@ -72,7 +72,6 @@ class ArticleController extends GetxController {
  Future<void> getDetailArticle(int id) async {
     try {
       isLoadingDetail(true);
-      // Sesuaikan URL dengan route Flask Anda
       final response = await http.get(
         Uri.parse('${ConfigApi.baseUrl}/api/articles/$id'),
         headers: ngrokHeaders,

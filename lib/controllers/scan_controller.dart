@@ -43,7 +43,7 @@ class ScanController {
       // Pastikan urutan images di UI sesuai: [0]Depan, [1]Kanan, [2]Kiri
       List<String> keys = ['foto_depan', 'foto_kanan', 'foto_kiri'];
       for (int i = 0; i < images.length; i++) {
-        if (i >= keys.length) break; // Safety check
+        if (i >= keys.length) break; 
         
         Uint8List bytes = await images[i].readAsBytes();
         request.files.add(

@@ -34,7 +34,6 @@ class ProfileController {
     }
   }
 
-  // === Fungsi untuk Update Profil (Tetap Sama) ===
   Future<Map<String, dynamic>> updateProfile({
     required int userId,
     required String name,

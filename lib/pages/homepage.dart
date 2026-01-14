@@ -167,7 +167,6 @@ class _HomepageState extends State<Homepage> {
                 ));
               }
 
-              // Menampilkan 5 artikel saja di Home
               var displayArticles = articleController.homeArticles;
 
               return ListView.builder(
