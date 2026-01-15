@@ -1,3 +1,4 @@
+import 'package:diet_apps/components/snackbar.dart';
 import 'package:diet_apps/controllers/feedback_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -10,49 +11,10 @@ class FeedbackUser extends StatefulWidget {
 }
 
 class _FeedbackUserState extends State<FeedbackUser> {
-  int _selectedRating = 0;
   final TextEditingController _commentController = TextEditingController();
   
   // Memanggil Controller yang sudah dibuat sebelumnya
   final FeedbackController feedbackController = Get.put(FeedbackController());
-
-  // Fungsi untuk membangun deretan bintang rating (Tetap seperti aslinya)
-  Widget _buildRatingStars() {
-    return Column(
-      verticalDirection: VerticalDirection.down,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        const Text(
-          "Ketuk untuk memberi rating",
-          style: TextStyle(fontSize: 12, color: Colors.grey),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(5, (index) {
-            return GestureDetector(
-              onTap: () {
-                setState(() {
-                  _selectedRating = index + 1;
-                });
-                FocusScope.of(context).unfocus();
-              },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: Icon(
-                  index < _selectedRating 
-                      ? Icons.star_rounded 
-                      : Icons.star_outline_rounded,
-                  color: Colors.amber,
-                  size: 45,
-                ),
-              ),
-            );
-          }),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +78,6 @@ class _FeedbackUserState extends State<FeedbackUser> {
                         "Kualitas Layanan",
                         style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
-                      const SizedBox(height: 10),
-                      _buildRatingStars(),
                       const SizedBox(height: 20),
                       TextField(
                         controller: _commentController,
@@ -146,35 +106,38 @@ class _FeedbackUserState extends State<FeedbackUser> {
                   width: double.infinity,
                   height: 55,
                   child: ElevatedButton(
-                    onPressed: feedbackController.isLoading.value 
-                      ? null 
-                      : () async {
-                        if (_selectedRating == 0) {
-                          Get.snackbar("Peringatan", "Silakan pilih rating bintang terlebih dahulu");
+                  onPressed: feedbackController.isLoading.value 
+                    ? null 
+                    : () async {
+                        FocusScope.of(context).unfocus();
+
+                        if (_commentController.text.trim().isEmpty) {
+                          ShowAlert(context, "Isi ulasan Anda", Colors.orange, 2);
                           return;
                         }
 
-                        // Mengirim data ke database via Controller
-                        bool success = await feedbackController.sendFeedback(
-                          _selectedRating, 
-                          _commentController.text
-                        );
+                        bool success = await feedbackController.sendFeedback(context, _commentController.text);
 
                         if (success) {
                           _commentController.clear();
-                          setState(() => _selectedRating = 0);
-                          // Kembali ke halaman sebelumnya setelah sukses
-                          Future.delayed(const Duration(seconds: 1), () => Get.back());
+                          await Future.delayed(const Duration(seconds: 2));
+                          
+                          if (mounted) {
+                            Get.back();
+                          }
                         }
-                      },
-                    style: ElevatedButton.styleFrom(
+                      },                    style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
                     child: feedbackController.isLoading.value
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
                         : const Text("Kirim Sekarang", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
                 )),

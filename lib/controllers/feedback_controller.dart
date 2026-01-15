@@ -1,40 +1,44 @@
 import 'package:diet_apps/config/api.dart';
+import 'package:flutter/material.dart'; // Tambahkan ini untuk SnackBar
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:diet_apps/components/snackbar.dart';
 
 class FeedbackController extends GetxController {
   var isLoading = false.obs;
-
-  Future<bool> sendFeedback(int rating, String message) async {
+  final storage = const FlutterSecureStorage();
+  Future<bool> sendFeedback(BuildContext context, String comment) async {
+    isLoading.value = true;
     try {
-      isLoading(true);
+      String? token = await storage.read(key: 'jwt_token');
+      final url = Uri.parse('${ConfigApi.baseUrl}/api/feedback');
       
       final response = await http.post(
-        Uri.parse('${ConfigApi.baseUrl}/api/feedback'),
+        url,
         headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true", // Penting untuk Mobile/Web via Ngrok
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({
-          "rating": rating,
-          "message": message,
-        }),
+        body: jsonEncode({'comment': comment}),
       );
 
-      if (response.statusCode == 201) {
-        Get.snackbar("Sukses", "Terima kasih atas masukan Anda!");
+      final responseData = jsonDecode(response.body);
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        ShowAlert(context, responseData['message'] ?? "Ulasan berhasil dikirim", Colors.green, 2);
+        Navigator.pop(context);
         return true;
       } else {
-        Get.snackbar("Gagal", "Terjadi kesalahan pada server");
+        ShowAlert(context, responseData['message'] ?? "Gagal mengirim", Colors.red, 2);
         return false;
       }
     } catch (e) {
-      print("Error feedback: $e");
-      Get.snackbar("Error", "Gagal terhubung ke server");
+      ShowAlert(context, "Koneksi gagal: $e", Colors.orange, 2);
       return false;
     } finally {
-      isLoading(false);
+      isLoading.value = false;
     }
   }
 }
