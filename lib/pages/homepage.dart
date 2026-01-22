@@ -160,15 +160,12 @@ class _HomepageState extends State<Homepage> {
             ),
             
             Obx(() {
-              if (articleController.isLoading.value) {
-                return const Center(child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: CircularProgressIndicator(),
-                ));
+              if (articleController.isLoadingHome.value) {
+                return Column(
+                  children: List.generate(3, (index) => ArticleCardSkeleton()),
+                );
               }
-
               var displayArticles = articleController.homeArticles;
-
               return ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),

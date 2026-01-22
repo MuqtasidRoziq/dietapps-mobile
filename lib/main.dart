@@ -1,4 +1,5 @@
 import 'package:diet_apps/controllers/article_controller.dart';
+import 'package:diet_apps/notification_services.dart';
 import 'package:diet_apps/pages/all_article.dart';
 import 'package:diet_apps/pages/auth/forgot/input_email.dart';
 import 'package:diet_apps/pages/auth/login_page.dart';
@@ -7,7 +8,6 @@ import 'package:diet_apps/pages/history.dart';
 import 'package:diet_apps/pages/scan/inputbmi.dart';
 import 'package:diet_apps/pages/chatbot.dart';
 import 'package:diet_apps/pages/details-article.dart';
-import 'package:diet_apps/pages/get_started.dart';
 import 'package:diet_apps/pages/report.dart';
 import 'package:diet_apps/pages/homepage.dart';
 import 'package:diet_apps/pages/polahidup.dart';
@@ -20,6 +20,7 @@ import 'package:diet_apps/pages/editprofile.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:diet_apps/pages/info_apps.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:diet_apps/pages/feedback.dart';
@@ -30,20 +31,27 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   cameras = await availableCameras();
   Get.put(ArticleController());
-  runApp(DietApps());
+  await NotifService.init();
+  await NotifService.requestNotificationPermission();
+  final storage = const FlutterSecureStorage();
+  String? token = await storage.read(key: 'jwt_token');
+
+  runApp(DietApp(initialRoute: token != null ? '/homepage' : '/'));
 }
 
-class DietApps extends StatelessWidget {
+class DietApp extends StatelessWidget {
+  final String initialRoute;
+  const DietApp({super.key, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/login',
+      title: 'Diet Apps',
+      initialRoute: initialRoute,
       routes: {
-        '/' : (context) => GetStarted(),
+        '/' : (context) => LoginPage(),
         '/register' : (context) => RegisterPage(),
-        '/login' : (context) => LoginPage(),
         '/forgot-password' : (context) => ForgotPassword(),
         '/homepage' : (context) => Homepage(),
         '/chatbot' : (context) => ChatBot(),

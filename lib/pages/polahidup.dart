@@ -1,5 +1,6 @@
 import 'package:diet_apps/components/snackbar.dart';
 import 'package:diet_apps/controllers/recommendation_controller.dart';
+import 'package:diet_apps/notification_services.dart';
 import 'package:flutter/material.dart';
 import 'package:diet_apps/components/category_button.dart';
 class RePolahidup extends StatefulWidget {
@@ -11,7 +12,7 @@ class RePolahidup extends StatefulWidget {
 
 class _RePolahidupState extends State<RePolahidup> {
   String selectedCategory = "Makanan";
-  Map<String, dynamic> dataReal = {'makanan': [], 'olahraga': []}; // Data ini yang kita pakai
+  Map<String, dynamic> dataReal = {'makanan': [], 'olahraga': []}; 
   Map<String, bool> itemStatus = {};
   Map<String, String> alarmTimes = {};
   bool isLoading = true;
@@ -25,28 +26,28 @@ class _RePolahidupState extends State<RePolahidup> {
   Future<void> _initData() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final dynamic args = ModalRoute.of(context)!.settings.arguments;
+      
       Map<String, bool> savedChecklist = await RecommendationController.getChecklist();
       Map<String, String> savedAlarms = await RecommendationController.getAlarms();
 
       if (args != null) {
-        // Jika baru selesai scan, data langsung ada
         setState(() {
           dataReal = args as Map<String, dynamic>;
           itemStatus = savedChecklist;
-          alarmTimes = savedAlarms;
+          alarmTimes = savedAlarms; // Masukkan ke state
           isLoading = false;
         });
         await RecommendationController.saveToLocal(dataReal);
       } else {
-        // JIKA DARI HOMEPAGE: Panggil Controller yang sudah terhubung ke ENDPOINT
         Map<String, dynamic>? data = await RecommendationController.getData(context);
         
         setState(() {
-                if (data != null) dataReal = data;
-                itemStatus = savedChecklist; // Load centang yang tersimpan
-                isLoading = false;
-              });
-            }
+          if (data != null) dataReal = data;
+          itemStatus = savedChecklist;
+          alarmTimes = savedAlarms; // PENTING: Tambahkan ini agar tidak hilang saat balik ke halaman
+          isLoading = false;
+        });
+      }
     });
   }
 
@@ -66,7 +67,7 @@ class _RePolahidupState extends State<RePolahidup> {
         children: [
           const SizedBox(height: 10),
           CategoryBar(
-            categories: ["Makanan", "Olahraga", "Tidur"],
+            categories: ["Makanan", "Olahraga"],
             selectedCategory: selectedCategory,
             onCategorySelected: (category) => setState(() => selectedCategory = category),
           ),
@@ -160,6 +161,11 @@ class _RePolahidupState extends State<RePolahidup> {
               onChanged: (val) async {
                 setState(() => itemStatus[id] = val!);
                 await RecommendationController.saveChecklist(itemStatus);
+                if (val == true) {
+                  await NotifService.cancelNotification(
+                    ("AUTO_$id").hashCode.abs(),
+                  );
+                }
                 ShowAlert(context, 
                   isDone ? "Belum dilakukan" : "Selesai dilakukan", 
                   isDone ? Colors.orange : Colors.green, 
@@ -193,79 +199,74 @@ class _RePolahidupState extends State<RePolahidup> {
         ),
       );
 
-      // Jika pilih hapus (Navigator pop false)
       if (actionChoose == false) {
         setState(() {
           alarmTimes.remove(id);
         });
+        // Memanggil controller (Sekarang otomatis menghapus notifikasi di sistem HP)
         await RecommendationController.deleteAlarmTime(id);
-        ShowAlert(context, 'Alarm berhasil dihapus!', Colors.red, 2);
+        ShowAlert(context, 'Alarm & Notifikasi dihapus!', Colors.red, 2);
         return; 
       }
-      
-      // Jika cancel dialog (klik luar)
       if (actionChoose == null) return;
     }
 
     final TimeOfDay? picked = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
-      );
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
 
     if (picked != null) {
-      // 1. Konversi waktu yang dipilih ke total menit agar lebih akurat
       int pickedTotalMinutes = (picked.hour * 60) + picked.minute;
+      String formattedTime = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
 
-      try {
-        if (recomRange.contains(' - ')) {
-          List<String> range = recomRange.split(' - ');
-          
-          int getMinutes(String timeStr) {
-            // Bersihkan string dari karakter selain angka dan titik dua
-            String cleanStr = timeStr.replaceAll(RegExp(r'[^0-9:]'), '').trim();
-            
-            if (cleanStr.contains(':')) {
-              List<String> parts = cleanStr.split(':');
-              return (int.parse(parts[0]) * 60) + int.parse(parts[1]);
-            } else {
-              // Jika hanya angka jam saja (misal "18")
-              return int.parse(cleanStr) * 60;
-            }
+      // --- LOGIKA VALIDASI RENTANG WAKTU ---
+      bool isOutOfRange = false;
+      if (recomRange.contains(' - ')) {
+        List<String> range = recomRange.split(' - ');
+        
+        int getMinutes(String timeStr) {
+          String cleanStr = timeStr.replaceAll(RegExp(r'[^0-9:]'), '').trim();
+          if (cleanStr.contains(':')) {
+            List<String> parts = cleanStr.split(':');
+            return (int.parse(parts[0]) * 60) + int.parse(parts[1]);
           }
-
-          int startMinutes = getMinutes(range[0]);
-          int endMinutes = getMinutes(range[1]);
-
-          // 3. Bandingkan dalam satuan menit
-          if (pickedTotalMinutes < startMinutes || pickedTotalMinutes > endMinutes) {
-            showDialog(context: context, builder: (context) => AlertDialog(
-              title: const Text("Waktu Diluar Rekomendasi"),
-              content: Text("Jam yang Anda pilih (${picked.format(context)}) berada diluar rentang rekomendasi (${recomRange}). Apakah Anda yakin ingin melanjutkan?"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text("Batal", style: TextStyle(color: Colors.red)),
-                ),
-              ],
-            )).then((proceed) async {
-              if (proceed == true) {
-                String formattedTime = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
-                setState(() => alarmTimes[id] = formattedTime);
-                await RecommendationController.saveAlarmTime(id, formattedTime);
-              }
-            });
-            return; // Hentikan eksekusi jika tidak lanjut
-          }
+          return int.parse(cleanStr) * 60;
         }
-      } catch (e) {
-        print("Error Validasi: $e");
+
+        int startMinutes = getMinutes(range[0]);
+        int endMinutes = getMinutes(range[1]);
+
+        if (pickedTotalMinutes < startMinutes || pickedTotalMinutes > endMinutes) {
+          isOutOfRange = true;
+        }
       }
 
-      // 4. Simpan jika valid (atau tetap simpan dengan peringatan)
-      String formattedTime = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+      if (isOutOfRange) {
+        // Jika diluar rentang, tanya user dulu
+        bool? proceed = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Waktu Diluar Rekomendasi"),
+            content: Text("Jam ${picked.format(context)} berada diluar rentang $recomRange. Lanjutkan?"),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("Batal")),
+              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text("Ya, Set Alarm")),
+            ],
+          ),
+        );
+
+        if (proceed != true) return;
+      }
+
+      // --- PROSES SIMPAN & AKTIFKAN NOTIFIKASI ---
       setState(() => alarmTimes[id] = formattedTime);
-      await RecommendationController.saveAlarmTime(id, formattedTime);
-      ShowAlert(context, "Alarm berhasil diatur di pukul $formattedTime!", Colors.green, 2);
+      
+      // Panggil controller dengan parameter 'title' tambahan
+      // Sekarang fungsi ini di controller akan otomatis menjadwalkan notifikasi
+      await RecommendationController.saveAlarmTime(id, title, formattedTime);
+      
+      ShowAlert(context, "Alarm & Notifikasi berhasil diatur!", Colors.green, 2);
     }
   }
 }

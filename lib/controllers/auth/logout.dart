@@ -17,9 +17,7 @@ final GoogleSignIn _googleSignIn = GoogleSignIn(
 
 Future<void> logout(BuildContext context) async {
   try {
-    // 1. Bersihkan Google Sign In dengan proteksi try-catch
     try {
-      // Hanya jalankan jika library terdeteksi aktif
       if (await _googleSignIn.isSignedIn()) {
         await _googleSignIn.signOut();
       }
@@ -27,10 +25,8 @@ Future<void> logout(BuildContext context) async {
       print("Google Sign Out skipped/error: $googleError");
     }
 
-    // 2. Hapus Token JWT
-    await storage.deleteAll(); // Gunakan deleteAll untuk keamanan extra
-
-    // 3. Hapus SEMUA data lokal (PENTING untuk masalah foto tertukar)
+    await storage.deleteAll(); 
+    
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear(); 
 
@@ -43,6 +39,6 @@ Future<void> logout(BuildContext context) async {
   } catch (e) {
     print("Error Logout Utama: $e");
     // Tetap paksa pindah ke login jika error berat
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+    Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
   }
 }

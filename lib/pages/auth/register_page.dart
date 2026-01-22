@@ -1,15 +1,14 @@
-import 'package:diet_apps/components/snackbar.dart';
+import 'package:diet_apps/controllers/auth/register_controller.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatefulWidget {
-
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  // Inisialisasi Controller
+  final RegisterController _controller = RegisterController();
 
   final TextEditingController fullnameController = TextEditingController();
   final TextEditingController jkController = TextEditingController();
@@ -21,176 +20,118 @@ class _RegisterPageState extends State<RegisterPage> {
   bool isConfirmPasswordVisible = false;
   bool isLoading = false;
 
-  Future<void> Register() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    if (passwordController.text != confirmPasswordController.text) {
-      setState(() {
-        isLoading = false;
-      });
-      ShowAlert(context, "Password tidak sama harap cek kembali", Colors.red, 5);
-      return;
-    }
-
-    final url = Uri.parse(
-      "http://127.0.0.1:5000/api/auth/register",
-    );
-
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "fullname": fullnameController.text,
-        "jenis_kelamin": jkController.text,
-        "email": emailController.text,
-        "password": passwordController.text,
-      }),
-    );
-    final data = jsonDecode(response.body);
-
-    setState(() {
-      isLoading = false;
-    });
-
-    if (data["success"] == true) {
-      ShowAlert(context, data["message"], Colors.green, 2);
-      Navigator.pushNamed(context, '/login');
-    } else {
-      ShowAlert(context, data["message"], Colors.red, 5);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
+      backgroundColor: Color(0xFFF5F7FA),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          child: Column(
+            children: [
+              Icon(Icons.app_registration_rounded, size: 80, color: Colors.blueAccent),
+              SizedBox(height: 10),
+              Text("Create Account", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              SizedBox(height: 30),
+              
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20)],
+                ),
                 child: Column(
                   children: [
-                  Text("Register", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),textAlign: TextAlign.center,),
-                  SizedBox(height: 20,),
-                  TextField(
-                    controller: fullnameController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.person_outline),
-                      labelText: 'Full Name',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
-                    initialValue: jkController.text.isEmpty ? null : jkController.text,
-                    items: ['Laki-laki', 'Perempuan']
-                        .map((value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        jkController.text = value!;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.wc_outlined),
-                      labelText: 'Jenis Kelamin',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 20,),
-                  TextField(
-                    controller: emailController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email_outlined),
-                      labelText: 'Email',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: passwordController,
-                    obscureText: !isPasswordVisible,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      labelText: 'Password',
-                      border: OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
+                    _buildTextField(fullnameController, "Full Name", Icons.person_outline),
+                    SizedBox(height: 15),
+                    _buildDropdownField(),
+                    SizedBox(height: 15),
+                    _buildTextField(emailController, "Email", Icons.email_outlined),
+                    SizedBox(height: 15),
+                    _buildPasswordField(passwordController, "Password", isPasswordVisible, 
+                      () => setState(() => isPasswordVisible = !isPasswordVisible)),
+                    SizedBox(height: 15),
+                    _buildPasswordField(confirmPasswordController, "Confirm Password", isConfirmPasswordVisible, 
+                      () => setState(() => isConfirmPasswordVisible = !isConfirmPasswordVisible)),
+                    SizedBox(height: 30),
+                    
+                    // Button Trigger Controller
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton(
+                        onPressed: isLoading ? null : () {
+                          _controller.register(
+                            context,
+                            fullname: fullnameController.text,
+                            email: emailController.text,
+                            password: passwordController.text,
+                            confirmPassword: confirmPasswordController.text,
+                            jenisKelamin: jkController.text,
+                            setLoading: (val) => setState(() => isLoading = val),
+                          );
                         },
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: confirmPasswordController,
-                    obscureText: !isConfirmPasswordVisible,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock_outline),
-                      labelText: 'Confirm Password',
-                      border: OutlineInputBorder(),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isConfirmPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         ),
-                        onPressed: () {
-                          setState(() {
-                            isConfirmPasswordVisible = !isConfirmPasswordVisible;
-                          });
-                        },
+                        child: isLoading 
+                          ? CircularProgressIndicator(color: Colors.white) 
+                          : Text("Register", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: isLoading ? null : Register,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 20, horizontal: 100),
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: isLoading
-                        ? SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 3,
-                            ),
-                          )
-                        : Text("Register"),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            ),
-          ],
+            ],
+          ),
         ),
-      )
+      ),
+    );
+  }
+
+  // Widget Helper tetap di sini agar UI konsisten
+  Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: Colors.blueAccent),
+        labelText: label,
+        filled: true,
+        fillColor: Color(0xFFF8FAFB),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      ),
+    );
+  }
+
+  Widget _buildDropdownField() {
+    return DropdownButtonFormField<String>(
+      value: jkController.text.isEmpty ? null : jkController.text,
+      items: ['Laki-laki', 'Perempuan'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+      onChanged: (v) => setState(() => jkController.text = v!),
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.wc, color: Colors.blueAccent),
+        labelText: 'Jenis Kelamin',
+        filled: true,
+        fillColor: Color(0xFFF8FAFB),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      ),
+    );
+  }
+
+  Widget _buildPasswordField(TextEditingController controller, String label, bool isVisible, VoidCallback toggle) {
+    return TextField(
+      controller: controller,
+      obscureText: !isVisible,
+      decoration: InputDecoration(
+        prefixIcon: Icon(Icons.lock_outline, color: Colors.blueAccent),
+        labelText: label,
+        filled: true,
+        fillColor: Color(0xFFF8FAFB),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        suffixIcon: IconButton(icon: Icon(isVisible ? Icons.visibility : Icons.visibility_off), onPressed: toggle),
+      ),
     );
   }
 }

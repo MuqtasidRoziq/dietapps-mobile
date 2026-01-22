@@ -8,6 +8,7 @@ class ArticleController extends GetxController {
   var homeArticles = <ArticleModel>[].obs;
   var allArticles = <ArticleModel>[].obs;
   var isLoading = false.obs;
+  var isLoadingHome = false.obs;
 
   final String Url = "${ConfigApi.baseUrl}/api/articles";
 
@@ -19,29 +20,28 @@ class ArticleController extends GetxController {
 
   @override
   void onInit() {
-    super.onInit();
-    fetchHomeArticles();
-    fetchAllArticles();
-  }
+      super.onInit();
+      fetchHomeArticles();
+      fetchAllArticles();
+    }
 
   Future<void> fetchHomeArticles() async {
     try {
-      isLoading(true);
+      isLoadingHome(true);
       final response = await http.get(
-        Uri.parse('$Url/home'), 
-        headers: ngrokHeaders, // Gunakan header di sini
+        Uri.parse('$Url/home'),
+        headers: ngrokHeaders,
       );
-      
+
       if (response.statusCode == 200) {
         List data = json.decode(response.body);
-        homeArticles.value = data.map((e) => ArticleModel.fromJson(e)).toList();
-      } else {
-        print("Server Error Home: ${response.statusCode}");
+        homeArticles.value =
+            data.map((e) => ArticleModel.fromJson(e)).toList();
       }
     } catch (e) {
       print("Error Fetch Home: $e");
     } finally {
-      isLoading(false);
+      isLoadingHome(false);
     }
   }
 

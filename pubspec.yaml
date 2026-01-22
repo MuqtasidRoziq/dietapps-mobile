@@ -44,6 +44,8 @@ dependencies:
   get: ^4.7.3
   flutter_local_notifications: ^17.0.0
   timezone: ^0.9.4
+  shimmer: ^3.0.0
+  wechat_assets_picker: ^10.1.0
 
 dev_dependencies:
   flutter_test:

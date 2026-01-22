@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 Widget ArticleCard(String? img, String title, String date, VoidCallback onPressed) {
   // 1. Pastikan string img tidak null dan tidak kosong/spasi saja
@@ -48,6 +49,66 @@ Widget ArticleCard(String? img, String title, String date, VoidCallback onPresse
   );
 }
 
+Widget ArticleCardSkeleton() {
+  return Container(
+    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    child: Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Row(
+        children: [
+          // Kotak gambar abu-abu
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Baris judul 1
+                Container(
+                  width: double.infinity,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Baris judul 2 (lebih pendek)
+                Container(
+                  width: 150,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                // Baris tanggal
+                Container(
+                  width: 80,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 // Fungsi pembantu agar kode lebih rapi dan aman
 Widget _buildImageWidget(String url) {
   if (url.isEmpty) {
@@ -73,3 +134,4 @@ Widget _buildImageWidget(String url) {
     ),
   );
 }
+

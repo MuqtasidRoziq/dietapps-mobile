@@ -20,10 +20,8 @@ class ArticleModel {
       id: json['id'],
       title: json['title'],
       summary: json['summary'],
-      content: json['content'], // Muncul di route detail
-      // Menangani image_url (dari /home) atau image (dari /api/articles)
+      content: json['content'],
       img: json['image_url'] ?? json['image'], 
-      // Menangani published_at (dari /home) atau date (dari /api/articles)
       date: json['published_at'] ?? json['date'],
     );
   }

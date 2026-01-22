@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../controllers/profile_controller.dart';
 import '../config/api.dart';
 import '../components/snackbar.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 class Editprofile extends StatefulWidget {
   const Editprofile({super.key});
@@ -57,9 +58,19 @@ class _EditprofileState extends State<Editprofile> {
   }
 
   _pickImage() async {
-    final file = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (file != null) {
-      setState(() => _selectedImage = file);
+    final List<AssetEntity>? result = await AssetPicker.pickAssets(
+      context,
+      pickerConfig: const AssetPickerConfig(
+        maxAssets: 1,
+        requestType: RequestType.image,
+      ),
+    );
+
+    if (result != null && result.isNotEmpty) {
+      final file = await result.first.file;
+      if (file != null) {
+        setState(() => _selectedImage = XFile(file.path));
+      }
     }
   }
 

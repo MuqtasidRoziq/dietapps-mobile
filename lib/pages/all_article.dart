@@ -33,7 +33,9 @@ class AllArticle extends StatelessWidget {
             Expanded(
               child: Obx(() {
                 if (articleController.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Column(
+                    children: List.generate(10, (index) => ArticleCardSkeleton()),
+                  );
                 }
 
                 if (articleController.allArticles.isEmpty) {
