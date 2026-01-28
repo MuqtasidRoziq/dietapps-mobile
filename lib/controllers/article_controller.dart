@@ -9,10 +9,13 @@ class ArticleController extends GetxController {
   var allArticles = <ArticleModel>[].obs;
   var isLoading = false.obs;
   var isLoadingHome = false.obs;
+  
+  // Tambahkan error state
+  var homeError = ''.obs;
+  var allError = ''.obs;
 
   final String Url = "${ConfigApi.baseUrl}/api/articles";
 
-  // Tambahkan Header ini
   final Map<String, String> ngrokHeaders = {
     "ngrok-skip-browser-warning": "true",
     "Accept": "application/json",
@@ -20,25 +23,31 @@ class ArticleController extends GetxController {
 
   @override
   void onInit() {
-      super.onInit();
-      fetchHomeArticles();
-      fetchAllArticles();
-    }
+    super.onInit();
+    fetchHomeArticles();
+    fetchAllArticles();
+  }
 
   Future<void> fetchHomeArticles() async {
     try {
       isLoadingHome(true);
+      homeError(''); // Reset error
+      
       final response = await http.get(
         Uri.parse('$Url/home'),
         headers: ngrokHeaders,
-      );
+      ).timeout(const Duration(seconds: 15)); // Tambahkan timeout
 
       if (response.statusCode == 200) {
         List data = json.decode(response.body);
-        homeArticles.value =
-            data.map((e) => ArticleModel.fromJson(e)).toList();
+        homeArticles.value = data.map((e) => ArticleModel.fromJson(e)).toList();
+        homeError('');
+      } else {
+        homeError('Gagal memuat artikel (${response.statusCode})');
+        print("Error Status: ${response.statusCode}");
       }
     } catch (e) {
+      homeError('Tidak dapat terhubung ke server');
       print("Error Fetch Home: $e");
     } finally {
       isLoadingHome(false);
@@ -48,17 +57,24 @@ class ArticleController extends GetxController {
   Future<void> fetchAllArticles({String query = ""}) async {
     try {
       isLoading(true);
+      allError(''); // Reset error
+      
       final url = query.isEmpty ? Url : "$Url?q=$query";
       final response = await http.get(
-        Uri.parse(url), 
-        headers: ngrokHeaders, // Gunakan header di sini juga
-      );
+        Uri.parse(url),
+        headers: ngrokHeaders,
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         List data = json.decode(response.body);
         allArticles.value = data.map((e) => ArticleModel.fromJson(e)).toList();
+        allError('');
+      } else {
+        allError('Gagal memuat artikel (${response.statusCode})');
+        print("Error Status: ${response.statusCode}");
       }
     } catch (e) {
+      allError('Tidak dapat terhubung ke server');
       print("Error Fetch All: $e");
     } finally {
       isLoading(false);
@@ -69,13 +85,13 @@ class ArticleController extends GetxController {
   var isLoadingDetail = false.obs;
   var detailArticle = ArticleModel(id: 0, title: '').obs;
 
- Future<void> getDetailArticle(int id) async {
+  Future<void> getDetailArticle(int id) async {
     try {
       isLoadingDetail(true);
       final response = await http.get(
         Uri.parse('${ConfigApi.baseUrl}/api/articles/$id'),
         headers: ngrokHeaders,
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);

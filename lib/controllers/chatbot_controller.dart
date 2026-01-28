@@ -20,7 +20,7 @@ class Chatbot{
       final data = jsonDecode(response.body);
       return data['answer'];
     } else {
-      return "Gagal mendapatkan jawaban: ${response.statusCode}";
+      return "Maaf sudah limit";
     }
   }
 }

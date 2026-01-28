@@ -24,19 +24,48 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:diet_apps/pages/feedback.dart';
+import 'package:permission_handler/permission_handler.dart';
 
+late List<CameraDescription> cameras; 
 
-late List<CameraDescription> cameras; // Menyimpan daftar kamera yang tersedia
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize cameras
   cameras = await availableCameras();
   Get.put(ArticleController());
+  
+  // Initialize notification service
   await NotifService.init();
-  await NotifService.requestNotificationPermission();
+  
+  // Request permissions
+  await _requestPermissions();
+  
+  // Check login status
   final storage = const FlutterSecureStorage();
   String? token = await storage.read(key: 'jwt_token');
 
   runApp(DietApp(initialRoute: token != null ? '/homepage' : '/'));
+}
+
+Future<void> _requestPermissions() async {
+  // Request notification permission
+  if (await Permission.notification.isDenied) {
+    final status = await Permission.notification.request();
+    debugPrint('📱 Notification permission: $status');
+  }
+  
+  // Request exact alarm permission (Android 12+)
+  if (await Permission.scheduleExactAlarm.isDenied) {
+    final status = await Permission.scheduleExactAlarm.request();
+    debugPrint('⏰ Exact alarm permission: $status');
+  }
+  
+  // Request alarm permission
+  if (await Permission.ignoreBatteryOptimizations.isDenied) {
+    final status = await Permission.ignoreBatteryOptimizations.request();
+    debugPrint('🔋 Battery optimization permission: $status');
+  }
 }
 
 class DietApp extends StatelessWidget {

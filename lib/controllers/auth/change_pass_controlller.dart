@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:diet_apps/config/api.dart';
+// import 'package:diet_apps/controllers/auth/logout.dart';
 import 'package:flutter/material.dart';
 import 'package:diet_apps/components/snackbar.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UbahPassController {
+  final storage = FlutterSecureStorage();
   Future<void> updatePassword(
     BuildContext context, {
     required String oldPassword,
@@ -27,8 +29,7 @@ class UbahPassController {
     setLoading(true);
 
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? token = prefs.getString('jwt_token');
+      String? token = await storage.read(key: 'jwt_token');
 
       final url = Uri.parse("${ConfigApi.baseUrl}/api/auth/change-password");
 
@@ -43,14 +44,16 @@ class UbahPassController {
           "new_password": newPassword,
         }),
       );
-
+      print(response.statusCode);
+      print(response.body);
       final data = jsonDecode(response.body);
 
-      if (data["success"] == true) {
-        ShowAlert(context, "Berhasil merubah password", Colors.green, 2);
-        Navigator.pop(context); // Kembali ke profil
+      if (response.statusCode == 200) {
+        ShowAlert(context, data["message"], Colors.green, 2);
+        Navigator.pop(context);
       } else {
-        ShowAlert(context, data["message"] ?? "Gagal mengubah password", Colors.red, 4);
+        ShowAlert(context, data["message"] , Colors.red, 4);
+        
       }
     } catch (e) {
       ShowAlert(context, "Kesalahan koneksi: $e", Colors.red, 4);

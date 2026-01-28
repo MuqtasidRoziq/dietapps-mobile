@@ -3,6 +3,7 @@ import 'package:diet_apps/controllers/recommendation_controller.dart';
 import 'package:diet_apps/notification_services.dart';
 import 'package:flutter/material.dart';
 import 'package:diet_apps/components/category_button.dart';
+
 class RePolahidup extends StatefulWidget {
   const RePolahidup({super.key});
 
@@ -34,7 +35,7 @@ class _RePolahidupState extends State<RePolahidup> {
         setState(() {
           dataReal = args as Map<String, dynamic>;
           itemStatus = savedChecklist;
-          alarmTimes = savedAlarms; // Masukkan ke state
+          alarmTimes = savedAlarms;
           isLoading = false;
         });
         await RecommendationController.saveToLocal(dataReal);
@@ -44,7 +45,7 @@ class _RePolahidupState extends State<RePolahidup> {
         setState(() {
           if (data != null) dataReal = data;
           itemStatus = savedChecklist;
-          alarmTimes = savedAlarms; // PENTING: Tambahkan ini agar tidak hilang saat balik ke halaman
+          alarmTimes = savedAlarms;
           isLoading = false;
         });
       }
@@ -96,7 +97,7 @@ class _RePolahidupState extends State<RePolahidup> {
           "${item['waktu']} (${item['jam']})",
           item['nama'] ?? "",
           "assets/images/sarapan.png",
-          item['jam'].toString(), // KIRIM RENTANG LENGKAP (Misal: "18:00 - 20:00")
+          item['jam'].toString(),
         );
       });
     }
@@ -111,7 +112,7 @@ class _RePolahidupState extends State<RePolahidup> {
           "${item['area']}: ${item['gerakan']}",
           "Durasi: ${item['durasi']}\nJam: ${item['jam']}",
           "assets/images/run_iklan.png",
-          item['jam'].toString(), // KIRIM RENTANG LENGKAP
+          item['jam'].toString(),
         );
       });
     }
@@ -121,7 +122,7 @@ class _RePolahidupState extends State<RePolahidup> {
 
   Widget _buildActionCard(String id, String title, String desc, String img, String recomRange) {
     bool isDone = itemStatus[id] ?? false;
-    String? setTime = alarmTimes[id]; // Ambil jam yang sudah di-set
+    String? setTime = alarmTimes[id];
 
     return Card(
       child: Padding(
@@ -136,36 +137,48 @@ class _RePolahidupState extends State<RePolahidup> {
                 children: [
                   Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                   Text(desc, style: const TextStyle(fontSize: 16)),
+                  
                   if (setTime != null)
                     Container(
                       margin: const EdgeInsets.only(top: 4),
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(color: Colors.blue[50], borderRadius: BorderRadius.circular(4)),
-                      child: Text(
-                        "🔔 Alarm: $setTime", 
-                        style: const TextStyle(fontSize: 14, color: Colors.blue, fontWeight: FontWeight.bold)
+                      decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(4)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.alarm, size: 12, color: Colors.green),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Alarm: $setTime",
+                            style: const TextStyle(fontSize: 12, color: Colors.green, fontWeight: FontWeight.w500)
+                          ),
+                        ],
                       ),
                     ),
                 ],
               ),
             ),
+            
             IconButton(
               icon: Icon(
-                setTime != null ? Icons.alarm_on : Icons.alarm_add, // Icon berubah jika sudah set
-                color: setTime != null ? Colors.green : Colors.blueAccent
+                setTime != null ? Icons.alarm_on_rounded : Icons.alarm_add_rounded,
+                color: setTime != null ? Colors.green : Colors.blueAccent,
+                size: 28,
               ),
               onPressed: () => _setAlarm(id, title, recomRange),
             ),
+            
             Checkbox(
               value: isDone,
               onChanged: (val) async {
                 setState(() => itemStatus[id] = val!);
                 await RecommendationController.saveChecklist(itemStatus);
+                
                 if (val == true) {
-                  await NotifService.cancelNotification(
-                    ("AUTO_$id").hashCode.abs(),
-                  );
+                  int reminderId = ("AUTO_REMINDER_$id").hashCode.abs();
+                  await NotifService.cancelNotification(reminderId);
                 }
+                
                 ShowAlert(context, 
                   isDone ? "Belum dilakukan" : "Selesai dilakukan", 
                   isDone ? Colors.orange : Colors.green, 
@@ -188,11 +201,11 @@ class _RePolahidupState extends State<RePolahidup> {
           content: Text("Alarm untuk $title sudah di-set pada jam ${alarmTimes[id]}. Apa yang ingin Anda lakukan?"),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, false), // Berarti Hapus
+              onPressed: () => Navigator.pop(context, false),
               child: const Text("Hapus Alarm", style: TextStyle(color: Colors.red)),
             ),
             TextButton(
-              onPressed: () => Navigator.pop(context, true), // Berarti Ubah
+              onPressed: () => Navigator.pop(context, true),
               child: const Text("Ubah Jam"),
             ),
           ],
@@ -203,7 +216,6 @@ class _RePolahidupState extends State<RePolahidup> {
         setState(() {
           alarmTimes.remove(id);
         });
-        // Memanggil controller (Sekarang otomatis menghapus notifikasi di sistem HP)
         await RecommendationController.deleteAlarmTime(id);
         ShowAlert(context, 'Alarm & Notifikasi dihapus!', Colors.red, 2);
         return; 
@@ -220,7 +232,6 @@ class _RePolahidupState extends State<RePolahidup> {
       int pickedTotalMinutes = (picked.hour * 60) + picked.minute;
       String formattedTime = "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
 
-      // --- LOGIKA VALIDASI RENTANG WAKTU ---
       bool isOutOfRange = false;
       if (recomRange.contains(' - ')) {
         List<String> range = recomRange.split(' - ');
@@ -243,7 +254,6 @@ class _RePolahidupState extends State<RePolahidup> {
       }
 
       if (isOutOfRange) {
-        // Jika diluar rentang, tanya user dulu
         bool? proceed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -259,11 +269,8 @@ class _RePolahidupState extends State<RePolahidup> {
         if (proceed != true) return;
       }
 
-      // --- PROSES SIMPAN & AKTIFKAN NOTIFIKASI ---
       setState(() => alarmTimes[id] = formattedTime);
       
-      // Panggil controller dengan parameter 'title' tambahan
-      // Sekarang fungsi ini di controller akan otomatis menjadwalkan notifikasi
       await RecommendationController.saveAlarmTime(id, title, formattedTime);
       
       ShowAlert(context, "Alarm & Notifikasi berhasil diatur!", Colors.green, 2);

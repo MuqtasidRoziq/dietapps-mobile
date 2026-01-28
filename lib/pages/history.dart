@@ -41,10 +41,46 @@ class _HistoryState extends State<History> {
     });
   }
 
+  // 👇 TAMBAHKAN METHOD REFRESH INI
+  Future<void> _refreshHistory() async {
+    if (_userId != null && _userId != 0) {
+      setState(() {
+        _historyFuture = _historyController.getHistory();
+      });
+
+      // Tunggu sampai data selesai di-fetch
+      try {
+        await _historyFuture;
+
+        // Tampilkan feedback sukses
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 12),
+                  Text('Riwayat berhasil diperbarui'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        // Jika error, tidak perlu tampilkan snackbar karena sudah ada error state
+        print("Error refreshing history: $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Background lebih soft
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
         title: const Text("Riwayat Deteksi", 
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
@@ -54,27 +90,63 @@ class _HistoryState extends State<History> {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: _userId == null
-          ? const Center(child: Text("Silakan login terlebih dahulu"))
-          : FutureBuilder<List<dynamic>>(
-              future: _historyFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: _buildErrorState(snapshot.error.toString()));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text("Belum ada data riwayat."));
-                }
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.person_off_outlined, size: 64, color: Colors.grey.shade400),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Silakan login terlebih dahulu",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _refreshHistory,
+              color: Colors.blueAccent,
+              backgroundColor: Colors.white,
+              child: FutureBuilder<List<dynamic>>(
+                future: _historyFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: const [
+                        SizedBox(height: 200),
+                        Center(child: CircularProgressIndicator()),
+                      ],
+                    );
+                  } else if (snapshot.hasError) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        const SizedBox(height: 100),
+                        Center(child: _buildErrorState(snapshot.error.toString())),
+                      ],
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return ListView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                        Center(child: _buildEmptyState()),
+                      ],
+                    );
+                  }
 
-                final data = snapshot.data!;
-                return ListView.builder(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    return _buildModernCard(data[index]);
-                  },
-                );
-              },
+                  final data = snapshot.data!;
+                  return ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      return _buildModernCard(data[index]);
+                    },
+                  );
+                },
+              ),
             ),
     );
   }
@@ -111,12 +183,14 @@ class _HistoryState extends State<History> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            "${item['hari']}, ${item['tanggal']} ${item['bulan']} ${item['tahun']}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold, 
-                              fontSize: 16,
-                              color: Colors.blueGrey
+                          Expanded(
+                            child: Text(
+                              "${item['hari']}, ${item['tanggal']} ${item['bulan']} ${item['tahun']}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 16,
+                                color: Colors.blueGrey
+                              ),
                             ),
                           ),
                           Container(
@@ -124,6 +198,11 @@ class _HistoryState extends State<History> {
                             decoration: BoxDecoration(
                               color: Colors.blue[50],
                               borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Icon(
+                              Icons.calendar_today,
+                              size: 14,
+                              color: Colors.blue[700],
                             ),
                           )
                         ],
@@ -167,14 +246,93 @@ class _HistoryState extends State<History> {
     );
   }
 
+  // 👇 PERBAIKI ERROR STATE DENGAN TOMBOL RETRY
   Widget _buildErrorState(String error) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.error_outline, size: 60, color: Colors.redAccent),
-        const SizedBox(height: 10),
-        Text("Gagal memuat data: $error", textAlign: TextAlign.center),
-      ],
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.red.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.shade200),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.cloud_off_rounded, size: 64, color: Colors.red.shade300),
+          const SizedBox(height: 16),
+          Text(
+            "Gagal memuat data riwayat",
+            style: TextStyle(
+              color: Colors.red.shade700,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            error,
+            style: TextStyle(
+              color: Colors.red.shade600,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: _refreshHistory,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text("Coba Lagi"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blueAccent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 👇 TAMBAHKAN EMPTY STATE YANG LEBIH MENARIK
+  Widget _buildEmptyState() {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.history_outlined, size: 80, color: Colors.blue.shade300),
+          const SizedBox(height: 16),
+          Text(
+            "Belum ada riwayat deteksi",
+            style: TextStyle(
+              color: Colors.blue.shade700,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "Mulai scan postur tubuhmu untuk\nmelihat riwayat deteksi",
+            style: TextStyle(
+              color: Colors.blue.shade600,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
