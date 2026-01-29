@@ -43,16 +43,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 child: Column(
                   children: [
-                    _buildTextField(fullnameController, "Full Name", Icons.person_outline),
+                    _buildTextField(Key("fullname"), fullnameController, "Full Name", Icons.person_outline),
                     SizedBox(height: 15),
                     _buildDropdownField(),
                     SizedBox(height: 15),
-                    _buildTextField(emailController, "Email", Icons.email_outlined),
+                    _buildTextField(Key("email"), emailController, "Email", Icons.email_outlined),
                     SizedBox(height: 15),
-                    _buildPasswordField(passwordController, "Password", isPasswordVisible, 
+                    _buildPasswordField(Key("password"), passwordController, "Password", isPasswordVisible, 
                       () => setState(() => isPasswordVisible = !isPasswordVisible)),
                     SizedBox(height: 15),
-                    _buildPasswordField(confirmPasswordController, "Confirm Password", isConfirmPasswordVisible, 
+                    _buildPasswordField(Key("confirm_password"), confirmPasswordController, "Confirm Password", isConfirmPasswordVisible,
                       () => setState(() => isConfirmPasswordVisible = !isConfirmPasswordVisible)),
                     SizedBox(height: 30),
                     
@@ -92,8 +92,9 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   // Widget Helper tetap di sini agar UI konsisten
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon) {
+  Widget _buildTextField(Key key, TextEditingController controller, String label, IconData icon) {
     return TextField(
+      key: key,
       controller: controller,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.blueAccent),
@@ -107,6 +108,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _buildDropdownField() {
     return DropdownButtonFormField<String>(
+      key: Key("jenis_kelamin"),
       value: jkController.text.isEmpty ? null : jkController.text,
       items: ['Laki-laki', 'Perempuan'].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
       onChanged: (v) => setState(() => jkController.text = v!),
@@ -120,8 +122,9 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildPasswordField(TextEditingController controller, String label, bool isVisible, VoidCallback toggle) {
+  Widget _buildPasswordField(Key key, TextEditingController controller, String label, bool isVisible, VoidCallback toggle) {
     return TextField(
+      key: key,
       controller: controller,
       obscureText: !isVisible,
       decoration: InputDecoration(
