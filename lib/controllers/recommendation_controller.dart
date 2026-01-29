@@ -298,10 +298,11 @@ class RecommendationController {
     return await fetchLatestData(context);
   }
 
-  static Future<Map<String, dynamic>?> fetchLatestData(BuildContext context) async {
+  static Future<Map<String, dynamic>?> fetchLatestData(BuildContext context, {http.Client? client}) async {
+    final httpClient = client ?? http.Client();
     try {
       String? token = await storage.read(key: 'jwt_token');
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse("${ConfigApi.baseUrl}/api/latest_recommendation"),
         headers: {
           'ngrok-skip-browser-warning': 'true',

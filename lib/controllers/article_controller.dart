@@ -28,12 +28,13 @@ class ArticleController extends GetxController {
     fetchAllArticles();
   }
 
-  Future<void> fetchHomeArticles() async {
+  Future<void> fetchHomeArticles({http.Client? client}) async {
+    final httpClient = client ?? http.Client();
     try {
       isLoadingHome(true);
       homeError(''); // Reset error
       
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse('$Url/home'),
         headers: ngrokHeaders,
       ).timeout(const Duration(seconds: 15)); // Tambahkan timeout

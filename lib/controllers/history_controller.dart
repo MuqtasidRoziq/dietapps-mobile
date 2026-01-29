@@ -7,14 +7,15 @@ class HistoryController {
   final storage = const FlutterSecureStorage();
 
   // Hapus parameter 'int userId' karena tidak digunakan lagi di URL
-  Future<List<dynamic>> getHistory() async {
+  Future<List<dynamic>> getHistory({http.Client? client}) async {
+    final httpClient = client ?? http.Client();
     try {
       final String url = '${ConfigApi.baseUrl}/api/history'; 
       
       print("Requesting: $url");
       String? token = await storage.read(key: 'jwt_token');
       
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse(url),
         headers: {
           "Content-Type": "application/json",

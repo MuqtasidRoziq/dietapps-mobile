@@ -18,7 +18,9 @@ class ScanController {
     required double berat,
     required List<String> alergi,
     required List<XFile> images,
+    http.Client? client,
   }) async {
+    final httpClient = client ?? http.Client();
     try {
       var request = http.MultipartRequest("POST", Uri.parse(baseUrl));
 
@@ -56,7 +58,7 @@ class ScanController {
       }
 
       // 5. Kirim data dengan timeout (karena proses AI MediaPipe butuh waktu)
-      var streamedResponse = await request.send().timeout(const Duration(seconds: 60));
+      var streamedResponse = await httpClient.send(request).timeout(const Duration(seconds: 60));
       var response = await http.Response.fromStream(streamedResponse);
 
       // Print untuk debug, lihat apa yang dikirim server
