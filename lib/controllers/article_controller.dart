@@ -35,10 +35,10 @@ class ArticleController extends GetxController {
       homeError(''); // Reset error
       
       final response = await httpClient.get(
-        Uri.parse('$Url/home'),
+        Uri.parse('$Url/home'), 
         headers: ngrokHeaders,
-      ).timeout(const Duration(seconds: 15)); // Tambahkan timeout
-
+      ).timeout(const Duration(seconds: 15));
+      
       if (response.statusCode == 200) {
         List data = json.decode(response.body);
         homeArticles.value = data.map((e) => ArticleModel.fromJson(e)).toList();
